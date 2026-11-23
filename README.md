@@ -1,4 +1,4 @@
-# Peep Break
+# 🐥 Peep Break
 
 [![underhood: no magic](https://underhood-badge.netlify.app/badges/code-only.svg)](https://underhood-badge.netlify.app)
 
