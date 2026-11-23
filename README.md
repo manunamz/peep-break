@@ -28,3 +28,7 @@ Open `index.html` in a browser to play locally.
 | Name a held chick | N |
 | Sound | M |
 | Zoom | Scroll or pinch |
+
+## License
+
+[MIT](LICENSE)
