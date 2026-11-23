@@ -1,4 +1,4 @@
-<title>Brooder Barn</title>
+<title>Peep Break</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grandstander:wght@600;800&family=Nunito:wght@500;700;800&family=Caveat:wght@600&display=swap">
@@ -15,6 +15,7 @@
   --cream: #f6e8cc;
   --lamp: #ff8a3d;
   --sage: #5c7a66;
+  --mustard: #c99a2e;
   --f-display: "Grandstander", "Trebuchet MS", system-ui, sans-serif;
   --f-body: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
   color-scheme: dark;
@@ -27,12 +28,16 @@ body {
   -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent;
 }
 #game { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: default; }
+.vignette {
+  position: fixed; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse at center, rgba(20,10,4,0) 45%, rgba(20,10,4,.45) 100%);
+}
 
 .clip {
   position: fixed;
   top: calc(16px + env(safe-area-inset-top, 0px));
   left: calc(16px + env(safe-area-inset-left, 0px));
-  width: 184px; padding: 20px 14px 11px;
+  width: 196px; padding: 20px 14px 11px; box-sizing: border-box;
   background: linear-gradient(160deg, #dcbb87, var(--kraft) 55%, #cfa86f);
   color: var(--ink); border-radius: 5px; font-size: 13px;
   box-shadow: 0 8px 20px rgba(0,0,0,.4), inset 0 0 0 1px rgba(80,50,20,.22);
@@ -44,14 +49,21 @@ body {
   background: linear-gradient(#e1e3e4, #8d9295); border-radius: 4px 4px 9px 9px;
   box-shadow: 0 2px 3px rgba(0,0,0,.4);
 }
-.clip h1 { font: 800 21px/1.05 var(--f-display); margin: 0 0 8px; letter-spacing: .005em; text-wrap: balance; }
-.clip dl { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; margin: 0; }
+.clip h1 { font: 800 21px/1.05 var(--f-display); margin: 0 0 2px; letter-spacing: .005em; text-wrap: balance; }
+.clip .age { font-size: 11px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; opacity: .72; margin-bottom: 9px; }
+.mood { display: flex; align-items: center; gap: 7px; font-size: 15px; }
+.mood b { font-family: var(--f-display); font-weight: 800; }
+.mood .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--sage); box-shadow: inset 0 0 0 1.5px rgba(42,26,15,.35); flex: none; }
+.clip .tip { font-size: 12px; line-height: 1.35; margin: 3px 0 9px; min-height: 16px; opacity: .85; }
+.needs { display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; align-items: center; }
+.needs span { font-size: 12px; opacity: .8; }
+.meter { height: 7px; border-radius: 4px; background: rgba(42,26,15,.16); overflow: hidden; box-shadow: inset 0 1px 1px rgba(42,26,15,.2); }
+.meter b { display: block; height: 100%; width: 100%; border-radius: 4px; background: var(--sage); transition: width .6s, background-color .6s; }
+.needs em { font-style: normal; font-weight: 800; font-size: 12px; text-align: right; }
+.clip dl { display: grid; grid-template-columns: 1fr auto; gap: 1px 10px; margin: 9px 0 0; padding-top: 7px; border-top: 1px dashed rgba(42,26,15,.4); font-size: 12px; }
 .clip dt { opacity: .78; }
 .clip dd { margin: 0; font-weight: 800; font-variant-numeric: tabular-nums; text-align: right; }
-.clip .foot {
-  margin-top: 8px; padding-top: 6px; border-top: 1px dashed rgba(42,26,15,.4);
-  font-size: 10.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; opacity: .8;
-}
+.clip .foot { margin-top: 7px; font-size: 10.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; opacity: .7; }
 
 .corner {
   position: fixed; display: flex; gap: 8px;
@@ -69,18 +81,28 @@ body {
 .round[aria-pressed="false"] .on, .round[aria-pressed="true"] .off { display: none; }
 
 .panel {
-  position: absolute; top: 58px; right: 0; width: 236px; padding: 14px;
+  position: absolute; top: 58px; right: 0; width: 270px; max-width: calc(100vw - 32px); box-sizing: border-box; padding: 14px;
   background: var(--kraft); color: var(--ink); border-radius: 8px;
-  box-shadow: 0 10px 24px rgba(0,0,0,.45); display: grid; gap: 12px;
+  box-shadow: 0 10px 24px rgba(0,0,0,.45); display: grid; gap: 14px;
+  max-height: calc(100vh - 120px); overflow: auto;
 }
 .panel .lbl { font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 6px; opacity: .8; }
 .seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
-.seg button {
+.seg.four { grid-template-columns: repeat(4, 1fr); }
+.seg button, .plain {
   min-height: 36px; border: 0; border-radius: 6px; cursor: pointer;
   background: rgba(42,26,15,.1); color: var(--ink); font: 700 13px var(--f-body);
 }
-.seg button:hover { background: rgba(42,26,15,.18); }
+.seg button:hover, .plain:hover { background: rgba(42,26,15,.18); }
 .seg button[aria-pressed="true"] { background: var(--barn); color: var(--cream); }
+.plain { width: 100%; padding: 0 10px; }
+.plain.warn { background: var(--barn); color: var(--cream); }
+.names { display: flex; flex-wrap: wrap; gap: 5px; }
+.names button { min-height: 32px; padding: 0 10px 0 7px; border: 0; border-radius: 16px; cursor: pointer; background: rgba(42,26,15,.1); color: var(--ink); font: 700 13px var(--f-body); display: flex; align-items: center; gap: 6px; }
+.names button:hover { background: rgba(42,26,15,.18); }
+.names i { width: 9px; height: 9px; border-radius: 50%; display: block; }
+.names .none { font-size: 12.5px; opacity: .75; line-height: 1.4; }
+.small { font-size: 12px; line-height: 1.4; opacity: .78; margin: 6px 0 0; }
 
 .actions {
   position: fixed; left: 0; right: 0;
@@ -99,15 +121,16 @@ body {
 .act:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--barn-lo), 0 5px 10px rgba(0,0,0,.35), inset 0 0 0 2px rgba(246,232,204,.2); }
 .act:disabled { opacity: .45; cursor: default; }
 .act[data-on="true"] { background: var(--sage); box-shadow: 0 3px 0 #3a5143, 0 10px 18px rgba(0,0,0,.35), inset 0 0 0 2px rgba(246,232,204,.25); }
+#bUse span { min-width: 7.5em; text-align: left; }
 kbd {
   font: 800 11px var(--f-body); letter-spacing: .05em; min-width: 14px; text-align: center;
   background: rgba(246,232,204,.14); border: 1px solid rgba(246,232,204,.3); border-radius: 5px; padding: 3px 6px;
 }
-button:focus-visible { outline: 3px solid var(--lamp); outline-offset: 2px; }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--lamp); outline-offset: 2px; }
 
 .hint {
   position: fixed; left: calc(16px + env(safe-area-inset-left, 0px)); bottom: calc(22px + env(safe-area-inset-bottom, 0px));
-  max-width: 250px; font-size: 12px; line-height: 1.45; color: rgba(246,232,204,.78);
+  max-width: 230px; font-size: 12px; line-height: 1.45; color: rgba(246,232,204,.78);
   text-shadow: 0 1px 3px rgba(0,0,0,.8); pointer-events: none;
 }
 .toast {
@@ -118,22 +141,39 @@ button:focus-visible { outline: 3px solid var(--lamp); outline-offset: 2px; }
 }
 .toast.show { opacity: 1; }
 
+.namer {
+  position: fixed; left: 50%; bottom: calc(84px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%) rotate(-.6deg);
+  width: min(320px, calc(100% - 32px)); box-sizing: border-box; padding: 14px;
+  background: var(--kraft); color: var(--ink); border-radius: 8px; box-shadow: 0 12px 28px rgba(0,0,0,.5);
+  display: grid; grid-template-columns: 1fr auto; gap: 8px;
+}
+.namer label { grid-column: 1 / -1; font: 800 16px var(--f-display); }
+.namer input {
+  min-width: 0; min-height: 40px; padding: 0 10px; border: 0; border-radius: 6px;
+  background: #f3e3c4; color: var(--ink); font: 700 16px var(--f-body); box-shadow: inset 0 1px 2px rgba(42,26,15,.3);
+}
+.namer .row { grid-column: 1 / -1; display: flex; gap: 8px; }
+.namer button { flex: 1; min-height: 38px; border: 0; border-radius: 6px; cursor: pointer; font: 800 14px var(--f-body); }
+.namer .save { background: var(--barn); color: var(--cream); }
+.namer .cancel { background: rgba(42,26,15,.12); color: var(--ink); }
+
 .intro {
   position: fixed; inset: 0; display: grid; place-items: center;
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
   background: radial-gradient(ellipse at center, rgba(23,17,12,.25), rgba(23,17,12,.7));
 }
 .card {
-  width: 100%; max-width: 440px; box-sizing: border-box; padding: 26px 24px 22px;
+  width: 100%; max-width: 460px; box-sizing: border-box; padding: 26px 24px 22px;
   background: linear-gradient(165deg, #dfc08e, var(--kraft) 60%, #cca46a); color: var(--ink);
   border-radius: 8px; box-shadow: 0 18px 40px rgba(0,0,0,.5), inset 0 0 0 1px rgba(80,50,20,.25);
   transform: rotate(-.8deg); max-height: calc(100% - 40px); overflow: auto;
 }
-.card h2 { font: 800 clamp(30px, 8vw, 42px)/1 var(--f-display); margin: 0 0 10px; text-wrap: balance; }
-.card p { margin: 0 0 16px; font-size: 15.5px; line-height: 1.5; max-width: 38ch; }
-.card dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0 0 20px; font-size: 14px; }
+.card h2 { font: 800 clamp(28px, 7.5vw, 40px)/1.02 var(--f-display); margin: 0 0 10px; text-wrap: balance; }
+.card p { margin: 0 0 14px; font-size: 15px; line-height: 1.5; max-width: 40ch; }
+.card dl { display: grid; grid-template-columns: auto 1fr; gap: 5px 14px; margin: 0 0 18px; font-size: 14px; }
 .card dt { font-weight: 800; }
 .card dd { margin: 0; opacity: .85; }
+.card ul { margin: 0 0 18px; padding-left: 20px; font-size: 15px; line-height: 1.55; }
 .go {
   width: 100%; min-height: 52px; border: 0; border-radius: 10px; cursor: pointer;
   background: var(--barn); color: var(--cream); font: 800 18px var(--f-display); letter-spacing: .02em;
@@ -142,29 +182,71 @@ button:focus-visible { outline: 3px solid var(--lamp); outline-offset: 2px; }
 .go:hover { background: var(--barn-hi); }
 .card small { display: block; margin-top: 10px; text-align: center; font-size: 12px; opacity: .7; }
 
-@media (hover: none) { .act kbd { display: none; } .act { padding: 0 18px; } .hint { display: none; } }
-@media (max-width: 720px) {
-  .hint { display: none; }
-  .clip { width: 150px; padding: 17px 11px 9px; font-size: 12px; }
-  .clip h1 { font-size: 17px; margin-bottom: 5px; }
-  .clip .foot { font-size: 9.5px; }
-  .act { min-height: 46px; font-size: 14px; padding: 0 14px; gap: 6px; }
-  .act kbd { display: none; }
+.modes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.mode-btn {
+  text-align: left; padding: 12px 14px 14px; border: 0; border-radius: 10px; cursor: pointer;
+  color: var(--cream); font: 600 13px/1.4 var(--f-body);
 }
-@media (max-width: 380px) { .clip .row-on, .clip .foot { display: none; } }
+.mode-btn b { display: block; font: 800 19px var(--f-display); margin-bottom: 3px; }
+.mode-btn.cozy { background: var(--sage); box-shadow: 0 4px 0 #3a5143, 0 10px 20px rgba(0,0,0,.25); }
+.mode-btn.care { background: var(--barn); box-shadow: 0 4px 0 var(--barn-lo), 0 10px 20px rgba(0,0,0,.25); }
+.mode-btn:hover { filter: brightness(1.08); }
+.seg.two { grid-template-columns: 1fr 1fr; }
+body.cozy .care-only { display: none; }
+
+.guide .card { max-width: 640px; transform: none; padding-top: 22px; }
+.guide .head { display: flex; justify-content: space-between; align-items: start; gap: 12px; }
+.guide .x { flex: none; width: 40px; height: 40px; border: 0; border-radius: 50%; cursor: pointer; background: rgba(42,26,15,.12); color: var(--ink); font: 800 20px/1 var(--f-body); }
+.guide nav { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 16px; }
+.guide nav button { min-height: 34px; padding: 0 12px; border: 0; border-radius: 17px; cursor: pointer; background: rgba(42,26,15,.1); color: var(--ink); font: 700 13px var(--f-body); }
+.guide nav button[aria-selected="true"] { background: var(--barn); color: var(--cream); }
+.guide h3 { font: 800 19px var(--f-display); margin: 0 0 8px; }
+.guide section p, .guide section li { font-size: 14.5px; line-height: 1.55; }
+.guide section p { margin: 0 0 10px; max-width: 62ch; }
+.guide section ul { margin: 0 0 10px; padding-left: 20px; }
+.guide table { border-collapse: collapse; font-size: 14px; margin: 4px 0 12px; font-variant-numeric: tabular-nums; }
+.guide td, .guide th { padding: 3px 14px 3px 0; text-align: left; }
+.guide th { font-size: 11px; letter-spacing: .07em; text-transform: uppercase; opacity: .7; }
+.guide .note { font-size: 12.5px; opacity: .75; margin-top: 12px; }
+
+@media (hover: none) { .act kbd { display: none; } .act { padding: 0 18px; } .hint { display: none; } }
+@media (max-width: 420px) { .modes { grid-template-columns: 1fr; } }
+@media (max-width: 720px) {
+  .hint, .clip dl, .clip .foot { display: none; }
+  .clip { width: 156px; padding: 17px 11px 10px; font-size: 12px; }
+  .clip h1 { font-size: 17px; }
+  .clip .age { font-size: 9.5px; margin-bottom: 6px; }
+  .mood { font-size: 13px; }
+  .clip .tip { font-size: 11px; margin-bottom: 6px; }
+  .act { min-height: 46px; font-size: 14px; padding: 0 13px; gap: 6px; }
+  .act kbd { display: none; }
+  #bUse span { min-width: 0; }
+}
 </style>
 
 <canvas id="game" aria-label="A barn full of chicks. Use the keyboard or tap to move around."></canvas>
+<div class="vignette"></div>
 
 <div class="clip" aria-live="polite">
-  <h1>Brooder Barn</h1>
+  <h1>Peep Break</h1>
+  <div class="age" id="sAge">Week 1 · lamps 35 °C</div>
+  <div class="mood"><span class="dot" id="moodDot"></span><b id="sMood">Content</b></div>
+  <div class="tip" id="sTip">All's well in the barn.</div>
+  <div class="needs">
+    <span>Feed</span><div class="meter"><b id="mFeed"></b></div>
+    <span>Water</span><div class="meter"><b id="mWater"></b></div>
+    <span>Bedding</span><div class="meter"><b id="mBed"></b></div>
+    <span>Air</span><div class="meter"><b id="mAir"></b></div>
+    <span>Heat</span><em id="sWarm">Cozy</em>
+  </div>
   <dl>
     <dt>Chicks</dt><dd id="sCount">300</dd>
+    <dt class="care-only">Lost</dt><dd class="care-only" id="sLost">0</dd>
     <dt>Napping</dt><dd id="sSleep">0</dd>
     <dt>Snuggled up</dt><dd id="sSnug">0</dd>
-    <dt class="row-on">On you</dt><dd class="row-on" id="sOn">0</dd>
+    <dt>On you</dt><dd id="sOn">0</dd>
   </dl>
-  <div class="foot"><span id="sTime">Afternoon</span> · lamps 35 °C</div>
+  <div class="foot" id="sTime">Afternoon</div>
 </div>
 
 <div class="corner">
@@ -172,10 +254,30 @@ button:focus-visible { outline: 3px solid var(--lamp); outline-offset: 2px; }
     <svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M15.5 9a4.2 4.2 0 0 1 0 6"/><path d="M18 6.5a7.8 7.8 0 0 1 0 11"/></svg>
     <svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg>
   </button>
+  <button class="round" id="bGuide" aria-label="Brooding guide">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5c2.6-1 5.3-1 8 .8 2.7-1.8 5.4-1.8 8-.8v13c-2.6-1-5.3-1-8 .8-2.7-1.8-5.4-1.8-8-.8z"/><path d="M12 6.3v13"/></svg>
+  </button>
   <button class="round" id="bSettings" aria-expanded="false" aria-controls="panel" aria-label="Barn settings">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2.2"/><circle cx="10" cy="17" r="2.2"/></svg>
   </button>
   <div class="panel" id="panel" hidden>
+    <div>
+      <div class="lbl">Mode</div>
+      <div class="seg two" data-key="mode">
+        <button id="mCozy" data-v="cozy">Cozy</button><button id="mCare" data-v="care">Care</button>
+      </div>
+      <p class="small" id="modeNote">A farmhand keeps things topped up. Nothing can go wrong.</p>
+    </div>
+    <div>
+      <div class="lbl">Your chicks</div>
+      <div class="names" id="nameList"></div>
+    </div>
+    <div>
+      <div class="lbl">Time of day</div>
+      <div class="seg four" data-key="time">
+        <button id="tReal" data-v="real">Clock</button><button id="tCycle" data-v="cycle">Fast</button><button id="tDay" data-v="day">Day</button><button id="tNight" data-v="night">Night</button>
+      </div>
+    </div>
     <div>
       <div class="lbl">Flock size</div>
       <div class="seg" data-key="count">
@@ -183,10 +285,9 @@ button:focus-visible { outline: 3px solid var(--lamp); outline-offset: 2px; }
       </div>
     </div>
     <div>
-      <div class="lbl">Time of day</div>
-      <div class="seg" data-key="time">
-        <button id="tCycle" data-v="cycle">Passing</button><button id="tDay" data-v="day">Day</button><button id="tNight" data-v="night">Night</button>
-      </div>
+      <div class="lbl">Brood</div>
+      <button class="plain" id="bNewBrood">Start a new brood</button>
+      <p class="small" id="broodNote">Chicks grow for six days, then they're ready for the coop.</p>
     </div>
   </div>
 </div>
@@ -194,26 +295,138 @@ button:focus-visible { outline: 3px solid var(--lamp); outline-offset: 2px; }
 <div class="actions">
   <button class="act" id="bLie"><kbd>Space</kbd><span>Lie down</span></button>
   <button class="act" id="bFeed"><kbd>F</kbd><span>Scatter feed</span></button>
-  <button class="act" id="bHold"><kbd>E</kbd><span>Pick up</span></button>
+  <button class="act" id="bUse" disabled><kbd>E</kbd><span>Use</span></button>
+  <button class="act" id="bAlt" hidden><kbd>Q</kbd><span>Lower lamp</span></button>
+  <button class="act" id="bName" hidden><kbd>N</kbd><span>Name</span></button>
 </div>
 
-<div class="hint">WASD or arrows to walk, Shift to tiptoe. Click the floor to walk there, click a chick to pet it. Scroll to zoom.</div>
+<div class="hint">WASD or arrows to walk, Shift to tiptoe. E uses whatever is nearby. Click a chick to pet it, scroll to zoom.</div>
 <div class="toast" id="toast" role="status"></div>
+
+<form class="namer" id="namer" hidden>
+  <label for="nameIn">Name this chick</label>
+  <input id="nameIn" maxlength="16" autocomplete="off" placeholder="Marigold">
+  <div class="row"><button type="submit" class="save">Save name</button><button type="button" class="cancel" id="nameCancel">Cancel</button></div>
+</form>
 
 <div class="intro" id="intro">
   <div class="card">
-    <h2>Brooder Barn</h2>
-    <p><span id="introCount">Three hundred</span> chicks, four heat lamps, and nothing you need to get done. Wander about, scatter some feed, or lie down in the straw and let them pile on.</p>
+    <h2>Peep Break</h2>
+    <p><span id="introCount">Three hundred</span> day-old chicks, a barn full of pine shavings, and heat lamps humming overhead. Leave it open in a tab and drop in on your breaks. One day here is a week of brooding, and in six days they're feathered out.</p>
     <dl>
       <dt>Walk</dt><dd>WASD or arrows, or click / tap the floor</dd>
-      <dt>Tiptoe</dt><dd>Hold Shift so nobody scatters</dd>
+      <dt>Use</dt><dd>E near feed sacks, the pump, the shavings, lamps, feeders, waterers, windows or a chick</dd>
       <dt>Pet</dt><dd>Click or tap a chick nearby</dd>
-      <dt>Lie down</dt><dd>Space, then wait</dd>
-      <dt>Feed</dt><dd>F scatters a handful of crumbles</dd>
-      <dt>Hold</dt><dd>E picks up the closest chick</dd>
+      <dt>Lie down</dt><dd>Space, then wait for the pile-on</dd>
+      <dt>Name</dt><dd>N while you're holding a chick</dd>
     </dl>
-    <button class="go" id="bStart">Step inside</button>
-    <small>Gentle peeping included. M toggles sound.</small>
+    <div class="modes">
+      <button class="mode-btn cozy" id="bCozy"><b>Cozy visit</b>A farmhand does the chores. Just hang out with the chicks.</button>
+      <button class="mode-btn care" id="bCare"><b>Care for them</b>You keep them warm, fed and watered. Real brooding, real stakes.</button>
+    </div>
+    <small>The book icon opens a brooding guide for real chicks. M toggles sound.</small>
+  </div>
+</div>
+
+<div class="intro" id="away" hidden>
+  <div class="card">
+    <h2 id="awayTitle">Welcome back</h2>
+    <ul id="awayList"></ul>
+    <button class="go" id="bBack">Back to the barn</button>
+  </div>
+</div>
+
+<div class="intro" id="done" hidden>
+  <div class="card">
+    <h2 id="doneTitle">They're feathered out</h2>
+    <p id="doneText"></p>
+    <ul id="doneList"></ul>
+    <div class="modes">
+      <button class="mode-btn care" id="bDoneNew"><b>New brood</b>Day-old chicks arrive and the clock starts over.</button>
+      <button class="mode-btn cozy" id="bDoneStay"><b>Stay a while</b>Hang out with this flock in cozy mode.</button>
+    </div>
+  </div>
+</div>
+
+<div class="intro guide" id="guide" hidden role="dialog" aria-modal="true" aria-labelledby="guideTitle">
+  <div class="card">
+    <div class="head"><h2 id="guideTitle">Brooding guide</h2><button class="x" id="guideClose" aria-label="Close guide">×</button></div>
+    <nav role="tablist">
+      <button role="tab" data-tab="read" aria-selected="true">Reading chicks</button>
+      <button role="tab" data-tab="heat" aria-selected="false">Heat</button>
+      <button role="tab" data-tab="feed" aria-selected="false">Feed</button>
+      <button role="tab" data-tab="water" aria-selected="false">Water</button>
+      <button role="tab" data-tab="bed" aria-selected="false">Bedding &amp; air</button>
+      <button role="tab" data-tab="health" aria-selected="false">Health</button>
+      <button role="tab" data-tab="game" aria-selected="false">In this barn</button>
+    </nav>
+    <section data-tab="read">
+      <h3>Watch where they sleep</h3>
+      <p>The chicks tell you if the heat is right. A thermometer at chick height helps, but their behaviour is the real gauge.</p>
+      <ul>
+        <li><b>Too cold:</b> packed tightly under the lamp, loud and constant peeping. Cold chicks can pile on each other and smother.</li>
+        <li><b>Too hot:</b> spread out to the far edges, panting with beaks open, wings held away from the body.</li>
+        <li><b>About right:</b> spread through the space, eating, drinking and napping, with soft contented trills.</li>
+      </ul>
+      <p>Chicks nap a lot and often fall asleep mid-step with their beak on the floor. That is normal. A chick standing hunched and alone, ruffled and not eating, is worth a closer look.</p>
+    </section>
+    <section data-tab="heat" hidden>
+      <h3>Warm under the lamp, cool elsewhere</h3>
+      <p>Start at 32 to 35 °C (90 to 95 °F) at chick height under the heat source, then lower it by about 3 °C (5 °F) each week. Stop adding heat at around 21 °C (70 °F), or when the chicks are fully feathered at about six weeks.</p>
+      <table>
+        <tr><th>Week</th><th>Under the lamp</th></tr>
+        <tr><td>1</td><td>32–35 °C · 90–95 °F</td></tr>
+        <tr><td>2</td><td>29–32 °C · 85–90 °F</td></tr>
+        <tr><td>3</td><td>27–29 °C · 80–85 °F</td></tr>
+        <tr><td>4</td><td>24–27 °C · 75–80 °F</td></tr>
+        <tr><td>5–6</td><td>21–24 °C · 70–75 °F</td></tr>
+      </table>
+      <p>Always leave a cooler area so chicks can move away from the heat. Raising a lamp lowers the temperature beneath it.</p>
+      <p>Many guides suggest roughly one 250-watt heat lamp per 50 chicks in a cool building, and more when it is cold. Heat lamps are a common cause of barn and coop fires. Hang them from a chain or wire, never only the clamp, keep them well clear of bedding, and check the fittings. Radiant heating plates are a safer alternative.</p>
+    </section>
+    <section data-tab="feed" hidden>
+      <h3>Chick starter, all the time</h3>
+      <p>Feed a chick starter crumble with about 18–20% protein from day one and keep it available at all times. For the first day or two, sprinkle some on a paper towel so the chicks find it.</p>
+      <ul>
+        <li>Medicated starter (usually amprolium) helps protect against coccidiosis. Skip it if your chicks were vaccinated for coccidiosis.</li>
+        <li>Never feed layer feed to chicks. Its calcium level can damage growing kidneys.</li>
+        <li>Keep treats under about 10% of their diet. If they eat anything other than starter, give them chick grit to help digest it.</li>
+      </ul>
+    </section>
+    <section data-tab="water" hidden>
+      <h3>Fresh, shallow, and clean</h3>
+      <p>Chicks need clean water at all times. Dehydration kills young chicks faster than hunger does.</p>
+      <ul>
+        <li>When chicks arrive, dip each beak gently in the water so they learn where it is.</li>
+        <li>Chicks can drown in deep water. Use chick waterers, and put marbles or pebbles in the trough for the first days.</li>
+        <li>Shavings and droppings get kicked into the water fast. Refresh it at least daily, and raise the waterer on a block as they grow.</li>
+      </ul>
+    </section>
+    <section data-tab="bed" hidden>
+      <h3>Pine shavings and fresh air</h3>
+      <p>Pine shavings are absorbent and soft. Avoid cedar, whose aromatic oils irritate the airways. Avoid slick surfaces like newspaper, which can cause splayed legs. Paper towels over the shavings for the first few days stop chicks eating the bedding while they learn what food is.</p>
+      <p>Spot-clean wet patches and droppings, especially around the waterers, and add fresh shavings often. A smell of ammonia means the bedding is overdue. Ammonia damages young lungs.</p>
+      <p>Ventilate the room, but avoid drafts at chick level. Opening a window helps on warm days. On cold nights it steals the heat the lamps are working to provide.</p>
+    </section>
+    <section data-tab="health" hidden>
+      <h3>Pasty butt and other trouble</h3>
+      <p><b>Pasty butt</b> is when droppings dry over the vent and seal it shut. It is most common in the first week, often after stress from shipping or bad temperatures, and it can kill a chick within a day or two. Check vents daily. Soften the mess with a warm damp cloth and ease it off gently. Never pull it away dry.</p>
+      <p><b>Coccidiosis</b> shows up as lethargy, ruffled feathers, hunched posture, and sometimes bloody droppings. Talk to a vet or your feed store quickly. Clean dry bedding and medicated starter both help prevent it.</p>
+      <p><b>Losses happen.</b> Even with good care, a few chicks may not make it through the first week. Several deaths in a short time usually point to heat, water or illness, so check those first.</p>
+      <p><b>Space:</b> plan on about 0.05 m² (half a square foot) per chick at first and around 0.2 m² (2 square feet) by six weeks. Round off brooder corners with cardboard so frightened or cold chicks can't pile into them.</p>
+    </section>
+    <section data-tab="game" hidden>
+      <h3>How this barn works</h3>
+      <p>Time runs seven times faster here: one real day is one week of brooding. Feed and water are the exception: like a real brooder, they need checking about twice a day in Care mode.</p>
+      <ul>
+        <li><b>Heat:</b> each lamp warms about 50 chicks. Stand under a lamp and press E to raise it or Q to lower it. Grab a spare from the lamp crate to hang more.</li>
+        <li><b>Feed and water:</b> scoop starter from the sacks by the door and fill a pail at the pump on the right-hand wall.</li>
+        <li><b>Bedding:</b> grab pine shavings from the wrapped bale on the left wall and spread them over droppings.</li>
+        <li><b>Health:</b> look for a hunched chick standing alone, pick it up, and clean its vent.</li>
+        <li><b>Goal:</b> in Care mode, raise as many as you can until they're feathered out at week six.</li>
+      </ul>
+      <p class="note">This guide covers the basics for backyard brooding. Your hatchery, feed store or a poultry vet can give advice for your climate and breed.</p>
+    </section>
   </div>
 </div>
 
@@ -230,39 +443,100 @@ const angLerp = (a, b, t) => a + angDiff(a, b) * t;
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ---------- settings ---------- */
-const settings = { sound: true, count: 300, time: 'cycle' };
+const settings = { sound: true, count: 300, time: 'real', mode: '' };
 try { Object.assign(settings, JSON.parse(localStorage.getItem('brooder-settings') || '{}')); } catch (e) {}
 if (![150, 300, 500].includes(settings.count)) settings.count = 300;
+if (!['real', 'cycle', 'day', 'night'].includes(settings.time)) settings.time = 'real';
+if (!['cozy', 'care'].includes(settings.mode)) settings.mode = '';
+const care = () => settings.mode === 'care';
 function saveSettings() { try { localStorage.setItem('brooder-settings', JSON.stringify(settings)); } catch (e) {} }
 
 /* ---------- canvas ---------- */
-const cvs = document.getElementById('game'), ctx = cvs.getContext('2d');
-const lc = document.createElement('canvas'), lctx = lc.getContext('2d');
+const cvs = document.getElementById('game'), ctx = cvs.getContext('2d', { alpha: false });
+// the night layer renders at quarter resolution; its gradients are soft so the upscale is invisible
+const LQ = 4, lc = document.createElement('canvas'), lctx = lc.getContext('2d');
 let W = 0, H = 0, DPR = 1;
+const MAX_PIXELS = 3.6e6;
 function resize() {
-  DPR = Math.min(2, window.devicePixelRatio || 1);
   W = cvs.clientWidth || innerWidth; H = cvs.clientHeight || innerHeight;
+  DPR = Math.min(2, window.devicePixelRatio || 1, Math.sqrt(MAX_PIXELS / (W * H)));
+  DPR = Math.max(1, DPR);
   cvs.width = Math.round(W * DPR); cvs.height = Math.round(H * DPR);
-  lc.width = cvs.width; lc.height = cvs.height;
+  lc.width = Math.ceil(W / LQ); lc.height = Math.ceil(H / LQ);
 }
 addEventListener('resize', resize); resize();
 
 /* ---------- world ---------- */
 const WW = 1300, WH = 950, WALL = 172, FS = 1.5;
 const B = { x0: 32, x1: 1268, y0: 182, y1: 924 };
-const lamps = [{ x: 290, y: 620 }, { x: 660, y: 470 }, { x: 1060, y: 420 }, { x: 930, y: 780 }];
+// lamps hang at one of three heights: lower is hotter underneath
+const lamps = [{ x: 290, y: 620, h: 1 }, { x: 660, y: 470, h: 1 }, { x: 1060, y: 420, h: 1 }, { x: 930, y: 780, h: 1 }];
+const MAX_LAMPS = 10, LAMP_BOOST = [25, 19, 13], LAMP_DROP = [48, 62, 78], LAMP_R = [44, 58, 72], LAMP_CHICKS = 50;
+const lampCrate = { x0: 1200, x1: 1262, y0: 268, y1: 314 };
 const feeders = [{ x: 460, y: 330, r: 22 }, { x: 860, y: 610, r: 22 }, { x: 520, y: 800, r: 22 }];
 const waterers = [{ x: 240, y: 410, r: 18 }, { x: 1150, y: 640, r: 18 }, { x: 690, y: 690, r: 18 }, { x: 200, y: 860, r: 18 }];
 const bucket = { x: 1225, y: 880, r: 13 };
 const circles = [...feeders, ...waterers, bucket];
+const strawBale = { x0: 32, x1: 88, y0: 520, y1: 660 };
+const sackRect = { x0: 764, x1: 842, y0: 160, y1: 212 };
+const pump = { x0: 1222, x1: 1268, y0: 452, y1: 506 };
 const rects = [
   { x0: 32, x1: 142, y0: 160, y1: 240 },
   { x0: 1168, x1: 1268, y0: 160, y1: 232 },
-  { x0: 32, x1: 88, y0: 520, y1: 660 },
-  { x0: 764, x1: 842, y0: 160, y1: 212 },
+  strawBale, sackRect, pump, lampCrate,
 ];
 const windowsX = [200, 440, 860, 1100];
 const cat = { x: 84, y: 194, purr: 0 };
+const BANDS = ['#d2453a', '#3f7fc4', '#e3a72f', '#7a52b3', '#3e9a5c', '#e0679a'];
+
+/* ---------- barn state (persisted) ---------- */
+const STATE_KEY = 'brooder-barn-state-v1';
+const barn = {
+  feed: [1, 1, 1], water: [1, 1, 1, 1], dirt: [0, 0, 0, 0],
+  windows: [false, false, false, false],
+  droppings: [], fresh: [],
+  air: .85, warmth: .72,
+  broodStart: Date.now(), savedAt: Date.now(), flock: null,
+  lost: 0, causes: {}, lostNames: [], startCount: 0, best: 0, doneShown: false,
+  dryFor: 0, hungryFor: 0, acc: {},
+};
+let hadSave = false;
+try {
+  const s = JSON.parse(localStorage.getItem(STATE_KEY) || 'null');
+  if (s && typeof s === 'object') {
+    hadSave = true;
+    for (const k of ['feed', 'water', 'dirt', 'windows']) if (Array.isArray(s[k]) && s[k].length === barn[k].length) barn[k] = s[k];
+    if (Array.isArray(s.droppings)) barn.droppings = s.droppings.slice(0, 320).map(d => ({ x: d[0], y: d[1], rot: d[2] || 0 }));
+    if (Array.isArray(s.fresh)) barn.fresh = s.fresh.slice(-12).map(f => ({ x: f[0], y: f[1], t: f[2] }));
+    for (const k of ['air', 'warmth', 'broodStart', 'savedAt', 'lost', 'startCount', 'best', 'dryFor', 'hungryFor']) if (typeof s[k] === 'number' && isFinite(s[k])) barn[k] = s[k];
+    if (s.causes && typeof s.causes === 'object') barn.causes = s.causes;
+    if (Array.isArray(s.lostNames)) barn.lostNames = s.lostNames.slice(-20);
+    barn.doneShown = !!s.doneShown;
+    if (Array.isArray(s.flock)) barn.flock = s.flock;
+    if (Array.isArray(s.lamps) && s.lamps.length <= MAX_LAMPS) {
+      lamps.length = 0;
+      for (const l of s.lamps) if (Array.isArray(l) && isFinite(l[0]) && isFinite(l[1])) lamps.push({ x: l[0], y: l[1], h: clamp(l[2] | 0, 1, 3) });
+    }
+  }
+} catch (e) {}
+let booted = false;
+function saveState() {
+  if (!booted) return;
+  barn.savedAt = Date.now();
+  const out = {
+    feed: barn.feed.map(v => +v.toFixed(4)), water: barn.water.map(v => +v.toFixed(4)), dirt: barn.dirt.map(v => +v.toFixed(4)),
+    windows: barn.windows, air: +barn.air.toFixed(3), warmth: +barn.warmth.toFixed(3),
+    broodStart: barn.broodStart, savedAt: barn.savedAt,
+    droppings: barn.droppings.map(d => [Math.round(d.x), Math.round(d.y), +d.rot.toFixed(2)]),
+    fresh: barn.fresh.map(f => [Math.round(f.x), Math.round(f.y), f.t]),
+    lamps: lamps.map(l => [Math.round(l.x), Math.round(l.y), l.h]),
+    lost: barn.lost, causes: barn.causes, lostNames: barn.lostNames, startCount: barn.startCount, best: barn.best, doneShown: barn.doneShown,
+    dryFor: Math.round(barn.dryFor), hungryFor: Math.round(barn.hungryFor),
+    // dead chicks are cleared on reload; their loss is already counted
+    flock: chicks.filter(c => c.s !== 'dead').map(c => [c.v, +c.size.toFixed(3), c.name || '', c.band || 0, Math.round(c.pasty || 0)]),
+  };
+  try { localStorage.setItem(STATE_KEY, JSON.stringify(out)); } catch (e) {}
+}
 
 /* ---------- light / time of day ---------- */
 const CYCLE = 600;
@@ -281,6 +555,7 @@ function updateLight() {
   L.day = keyf(DAYK, dayP); L.gold = keyf(GOLDK, dayP);
   L.sx = lerp(-110, 130, clamp(dayP / 0.64, 0, 1));
 }
+function clockP(d = new Date()) { return ((d.getHours() + d.getMinutes() / 60 - 5.5 + 24) % 24) / 24; }
 function timeName(p) {
   if (p < .07) return 'Dawn'; if (p < .25) return 'Morning'; if (p < .4) return 'Midday';
   if (p < .5) return 'Afternoon'; if (p < .62) return 'Golden hour'; if (p < .7) return 'Dusk';
@@ -299,21 +574,22 @@ function rr(g, x, y, w, h, r) {
 }
 function ell(g, x, y, rx, ry, rot = 0) { g.beginPath(); g.ellipse(x, y, Math.max(.01, rx), Math.max(.01, ry), rot, 0, TAU); g.fill(); }
 function circ(g, x, y, r) { g.beginPath(); g.arc(x, y, Math.max(.01, r), 0, TAU); g.fill(); }
+function canvas(w, h) { const c = document.createElement('canvas'); c.width = Math.ceil(w); c.height = Math.ceil(h); return c; }
 
 /* ---------- chick looks ---------- */
 const VARIANTS = [
-  { w: 55, base: '#f6d34a', hi: '#fff3a6', edge: '#dcae2a', wing: '#e9bd33', hb: '#f8da56', hh: '#fff6b8', he: '#e2b532' },
-  { w: 12, base: '#f3e3b3', hi: '#fffbee', edge: '#d6bf86', wing: '#e1cc94', hb: '#f6e8bd', hh: '#fffdf4', he: '#d9c38c' },
-  { w: 13, base: '#dea25a', hi: '#f5cf94', edge: '#b77a39', wing: '#c98a45', hb: '#e2aa64', hh: '#f7d6a0', he: '#bb7e3d' },
-  { w: 12, base: '#b98650', hi: '#dcb582', edge: '#8a5e33', wing: '#7b5130', stripe: '#4f321b', hb: '#c4925c', hh: '#e3c191', he: '#8d6136' },
-  { w: 8, base: '#34302c', hi: '#5a524b', edge: '#1d1a18', wing: '#25221f', hb: '#3a3531', hh: '#e9dbb2', he: '#211e1b' },
+  { w: 55, base: '#f6d34a', hi: '#fff3a6', edge: '#dcae2a', wing: '#e9bd33', fw: '#f4eedb', hb: '#f8da56', hh: '#fff6b8', he: '#e2b532' },
+  { w: 12, base: '#f3e3b3', hi: '#fffbee', edge: '#d6bf86', wing: '#e1cc94', fw: '#faf6ea', hb: '#f6e8bd', hh: '#fffdf4', he: '#d9c38c' },
+  { w: 13, base: '#dea25a', hi: '#f5cf94', edge: '#b77a39', wing: '#c98a45', fw: '#b8622a', hb: '#e2aa64', hh: '#f7d6a0', he: '#bb7e3d' },
+  { w: 12, base: '#b98650', hi: '#dcb582', edge: '#8a5e33', wing: '#7b5130', fw: '#6a3f20', stripe: '#4f321b', hb: '#c4925c', hh: '#e3c191', he: '#8d6136' },
+  { w: 8, base: '#34302c', hi: '#5a524b', edge: '#1d1a18', wing: '#25221f', fw: '#151413', hb: '#3a3531', hh: '#e9dbb2', he: '#211e1b' },
 ];
 const VW = VARIANTS.reduce((s, v) => s + v.w, 0);
 function pickVariant() { let r = Math.random() * VW; for (let i = 0; i < VARIANTS.length; i++) { r -= VARIANTS[i].w; if (r <= 0) return i; } return 0; }
-const bodySpr = [], headSpr = [];
+const bodySpr = [], headSpr = [], wingCol = [];
 function buildSprites() {
   for (const v of VARIANTS) {
-    let c = document.createElement('canvas'); c.width = c.height = 64; let g = c.getContext('2d');
+    let c = canvas(64, 64), g = c.getContext('2d');
     const cx = 32, cy = 32, R = 20;
     g.fillStyle = v.edge;
     for (let i = 0; i < 48; i++) { const a = i / 48 * TAU, r = R + rand(-1, 2.2); circ(g, cx + Math.cos(a) * r * .98, cy + Math.sin(a) * r * .9, rand(2.5, 4.4)); }
@@ -337,7 +613,7 @@ function buildSprites() {
     g.globalAlpha = 1;
     bodySpr.push(c);
 
-    c = document.createElement('canvas'); c.width = c.height = 32; g = c.getContext('2d');
+    c = canvas(32, 32); g = c.getContext('2d');
     g.fillStyle = v.he;
     for (let i = 0; i < 26; i++) { const a = i / 26 * TAU; circ(g, 16 + Math.cos(a) * 11, 16 + Math.sin(a) * 11, rand(1.4, 2.4)); }
     gr = g.createRadialGradient(19, 16, 1, 16, 16, 12);
@@ -345,22 +621,212 @@ function buildSprites() {
     g.fillStyle = gr; circ(g, 16, 16, 11.4);
     if (v.stripe) { g.strokeStyle = v.stripe; g.lineWidth = 2.6; g.lineCap = 'round'; g.beginPath(); g.moveTo(7, 16); g.lineTo(20, 16); g.stroke(); }
     headSpr.push(c);
+
+    wingCol.push(Array.from({ length: 6 }, (_, k) => rgb(mix(hex(v.wing), hex(v.fw), k / 5))));
   }
 }
-let softSpr = null;
-function buildSoft() {
-  const c = document.createElement('canvas'); c.width = 220; c.height = 128; const g = c.getContext('2d');
+let softSpr = null, glowSpr = null, freshSpr = null;
+function buildFx() {
+  let c = canvas(220, 128), g = c.getContext('2d');
   g.fillStyle = 'rgb(255,234,178)';
   for (const [px, py] of [[10, 8], [114, 8], [10, 66], [114, 66]]) {
     for (let k = 0; k < 9; k++) { g.globalAlpha = .1; rr(g, px + k * 1.6, py + k * 1.3, 96 - k * 3.2, 54 - k * 2.6, 8); g.fill(); }
   }
   softSpr = c;
+  // warm radial glow, drawn additively instead of using an expensive blend mode
+  c = canvas(128, 128); g = c.getContext('2d');
+  const gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  gr.addColorStop(0, 'rgba(255,128,60,1)'); gr.addColorStop(.45, 'rgba(255,105,45,.42)'); gr.addColorStop(1, 'rgba(255,90,30,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 128, 128);
+  glowSpr = c;
+  c = canvas(200, 200); g = c.getContext('2d');
+  g.lineCap = 'round';
+  for (let i = 0; i < 900; i++) {
+    const a = rand(TAU), d = Math.sqrt(Math.random()) * 92, x = 100 + Math.cos(a) * d, y = 100 + Math.sin(a) * d;
+    const fade = 1 - d / 96;
+    g.globalAlpha = .9 * fade; g.strokeStyle = ['#fbedbf', '#f4dc98', '#fff6d8', '#ead08a'][i % 4]; g.lineWidth = rand(.8, 1.6);
+    const b = rand(TAU), l = rand(3, 8);
+    g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + Math.cos(b) * l * .5 + rand(-1.5, 1.5), y + Math.sin(b) * l * .5 + rand(-1.5, 1.5), x + Math.cos(b) * l, y + Math.sin(b) * l); g.stroke();
+  }
+  freshSpr = c;
+}
+
+/* ---------- people sprites ---------- */
+const COL = { sw: '#5c7a66', swD: '#3f5848', swL: '#7a9a83', cuff: '#4c6856', bean: '#b5533a', beanD: '#8f3f2b', beanL: '#cf6a4c', pom: '#f1e4c8', pomD: '#d8c7a5', scarf: '#e0a83c', scarfD: '#b9862a', scarfS: '#9e3b2a', skin: '#f3cfae', skinD: '#e2ab86', jean: '#4d6584', jeanD: '#34465e', jeanL: '#6a82a2', boot: '#5a3b26', bootD: '#2e1f14', bootL: '#7d5638', hair: '#6b4630', hairD: '#4c301e', hairL: '#93643f' };
+const PS = 4;
+let lieLow = null, lieUp = null, standSpr = null;
+const LIE = { x0: -120, y0: -54, w: 216, h: 108 };
+const STAND = { x0: -26, y0: -26, w: 52, h: 52 };
+function knit(g, x0, y0, x1, y1, col, step = 3.2) {
+  g.strokeStyle = col; g.lineWidth = .55; g.beginPath();
+  for (let y = y0; y < y1; y += step * 1.15) for (let x = x0; x < x1; x += step) {
+    g.moveTo(x, y); g.lineTo(x + step * .5, y + step * .55); g.lineTo(x + step, y);
+  }
+  g.stroke();
+}
+function fuzzBall(g, x, y, r, light, dark) {
+  g.fillStyle = dark;
+  for (let i = 0; i < 28; i++) { const a = i / 28 * TAU, d = r * rand(.82, 1.02); circ(g, x + Math.cos(a) * d, y + Math.sin(a) * d, r * rand(.22, .34)); }
+  const gr = g.createRadialGradient(x - r * .3, y - r * .3, r * .1, x, y, r);
+  gr.addColorStop(0, '#fffaf0'); gr.addColorStop(.6, light); gr.addColorStop(1, dark);
+  g.fillStyle = gr; circ(g, x, y, r * .92);
+  g.fillStyle = 'rgba(255,255,255,.35)';
+  for (let i = 0; i < 10; i++) { const a = rand(TAU), d = rand(r * .7); circ(g, x + Math.cos(a) * d, y + Math.sin(a) * d, r * .09); }
+}
+function tube(g, pts, w, base, dark, light) {
+  const path = () => { g.beginPath(); g.moveTo(pts[0][0], pts[0][1]); if (pts.length === 3) g.quadraticCurveTo(pts[1][0], pts[1][1], pts[2][0], pts[2][1]); else g.lineTo(pts[1][0], pts[1][1]); };
+  g.lineCap = 'round'; g.lineJoin = 'round';
+  path(); g.strokeStyle = dark; g.lineWidth = w; g.stroke();
+  g.save(); g.translate(-w * .08, -w * .1); path(); g.strokeStyle = base; g.lineWidth = w * .78; g.stroke(); g.restore();
+  g.save(); g.translate(-w * .2, -w * .24); path(); g.strokeStyle = light; g.globalAlpha = .55; g.lineWidth = w * .22; g.stroke(); g.restore();
+}
+function buildPeople() {
+  // lower half of the lying figure: soft shadow, legs, boots
+  lieLow = canvas(LIE.w * PS, LIE.h * PS);
+  let g = lieLow.getContext('2d');
+  g.setTransform(PS, 0, 0, PS, -LIE.x0 * PS, -LIE.y0 * PS);
+  for (let k = 0; k < 10; k++) { g.fillStyle = 'rgba(40,22,6,.045)'; rr(g, -101 - k * 1.2 + 3, -27 - k + 4, 182 + k * 2.4, 54 + k * 2, 27 + k); g.fill(); }
+  g.fillStyle = 'rgba(40,22,6,.12)'; ell(g, 2, 37, 14, 6); // shadow of the arm laid out on the straw
+  const legs = [[[-6, -8.5], [-44, -12.5], [-80, -14]], [[-6, 8.5], [-42, 18], [-79, 14]]];
+  for (const L3 of legs) tube(g, L3, 15, COL.jean, COL.jeanD, COL.jeanL);
+  g.strokeStyle = 'rgba(30,40,58,.55)'; g.lineWidth = .7;
+  for (const [a, b, c] of legs) { g.beginPath(); g.moveTo(a[0], a[1] + 4.5); g.quadraticCurveTo(b[0], b[1] + 4.5, c[0], c[1] + 4); g.stroke(); }
+  g.fillStyle = 'rgba(255,255,255,.1)'; ell(g, -44, -14, 6, 3.4, -.1); ell(g, -42, 15.5, 6, 3.4, .5);
+  for (const [, , c] of legs) { // rolled cuffs
+    g.save(); g.translate(c[0] + 2, c[1]); g.rotate(Math.atan2(c[1] - legs[0][1][1], 1) * .1);
+    g.fillStyle = COL.jeanL; rr(g, -3, -8, 6.5, 16, 3); g.fill();
+    g.strokeStyle = COL.jeanD; g.lineWidth = .6; g.beginPath(); g.moveTo(.2, -7.5); g.lineTo(.2, 7.5); g.stroke();
+    g.restore();
+  }
+  for (const [ax, ay, rot] of [[-90, -17.5, -.38], [-89, 18, .42]]) {
+    g.save(); g.translate(ax, ay); g.rotate(rot);
+    g.fillStyle = COL.bootD; ell(g, -1, 0, 11, 7.8);
+    const bg = g.createRadialGradient(-2, -2.5, 1, 0, 0, 10); bg.addColorStop(0, COL.bootL); bg.addColorStop(1, COL.boot);
+    g.fillStyle = bg; ell(g, .5, -.3, 9.5, 6.6);
+    g.fillStyle = 'rgba(255,230,200,.18)'; ell(g, -4, -2, 3.5, 2.4);
+    g.strokeStyle = '#e8d7b8'; g.lineWidth = .7; g.beginPath();
+    for (let i = 0; i < 3; i++) { const x = 1 + i * 2.4; g.moveTo(x, -2.2); g.lineTo(x + 1.6, 2.2); g.moveTo(x, 2.2); g.lineTo(x + 1.6, -2.2); }
+    g.stroke();
+    g.restore();
+  }
+
+  // upper half: hair fanned on the straw, sweater, arms, scarf, face, beanie
+  lieUp = canvas(LIE.w * PS, LIE.h * PS);
+  g = lieUp.getContext('2d');
+  g.setTransform(PS, 0, 0, PS, -LIE.x0 * PS, -LIE.y0 * PS);
+  const HX = 55, HY = 0, HR = 11.8;
+  g.fillStyle = COL.hairD; ell(g, HX + 3, HY, 19, 17.5);
+  g.lineCap = 'round';
+  for (let i = 0; i < 110; i++) {
+    const t = rand(-1, 1), th = t * Math.PI * .7, sx = HX + Math.cos(th) * 8, sy = HY + Math.sin(th) * 8;
+    const len = rand(14, 25) * (1 - Math.abs(t) * .35), th2 = th + rand(-.2, .2);
+    const ex = HX + Math.cos(th2) * len, ey = HY + Math.sin(th2) * len;
+    g.strokeStyle = [COL.hair, COL.hairD, COL.hairL, COL.hair][i % 4]; g.lineWidth = rand(.6, 1.5); g.globalAlpha = rand(.7, 1);
+    g.beginPath(); g.moveTo(sx, sy); g.quadraticCurveTo((sx + ex) / 2 + rand(-3, 3), (sy + ey) / 2 + rand(-3, 3), ex, ey); g.stroke();
+  }
+  g.globalAlpha = 1;
+  // torso
+  const torso = () => { g.beginPath(); g.moveTo(-15, -17); g.quadraticCurveTo(-16, 0, -15, 17); g.quadraticCurveTo(10, 22, 36, 21); g.quadraticCurveTo(44, 12, 44, 0); g.quadraticCurveTo(44, -12, 36, -21); g.quadraticCurveTo(10, -22, -15, -17); g.closePath(); };
+  torso(); const tg = g.createRadialGradient(16, -6, 4, 14, 0, 34); tg.addColorStop(0, COL.swL); tg.addColorStop(.7, COL.sw); tg.addColorStop(1, COL.swD);
+  g.fillStyle = tg; g.fill();
+  g.save(); torso(); g.clip();
+  knit(g, -16, -22, 46, 22, 'rgba(30,50,38,.3)');
+  g.strokeStyle = 'rgba(30,50,38,.35)'; g.lineWidth = 1.2;
+  for (const cy of [-6, 6]) { // cable stitches
+    g.beginPath();
+    for (let x = -8; x < 38; x += 5) { g.moveTo(x, cy - 2.4); g.bezierCurveTo(x + 2, cy - 2.4, x + 3, cy + 2.4, x + 5, cy + 2.4); g.moveTo(x, cy + 2.4); g.bezierCurveTo(x + 2, cy + 2.4, x + 3, cy - 2.4, x + 5, cy - 2.4); }
+    g.stroke();
+  }
+  g.fillStyle = COL.cuff; g.fillRect(-17, -24, 6, 48);
+  g.strokeStyle = 'rgba(20,35,26,.4)'; g.lineWidth = .6; g.beginPath(); for (let y = -20; y < 21; y += 1.8) { g.moveTo(-17, y); g.lineTo(-11, y); } g.stroke();
+  g.restore();
+  // left arm resting on the belly, right arm out on the straw
+  tube(g, [[33, -18], [16, -31], [4, -9]], 9.5, COL.sw, COL.swD, COL.swL);
+  tube(g, [[33, 18], [18, 30], [-1, 34]], 9.5, COL.sw, COL.swD, COL.swL);
+  const hand = (x, y, rot, palmUp) => {
+    g.save(); g.translate(x, y); g.rotate(rot);
+    g.fillStyle = COL.cuff; rr(g, 1.5, -5, 4, 10, 2); g.fill();
+    const hg = g.createRadialGradient(-2, -1.5, .5, -1, 0, 5.5); hg.addColorStop(0, '#fbe2c9'); hg.addColorStop(1, COL.skin);
+    g.fillStyle = hg; ell(g, -2.2, 0, 4.6, 4);
+    g.fillStyle = COL.skin; ell(g, -1, palmUp ? -4.2 : 4.2, 2, 1.3, .4);
+    g.strokeStyle = COL.skinD; g.lineWidth = .5; g.beginPath();
+    for (const o of [-1.6, 0, 1.6]) { g.moveTo(-5.2, o); g.lineTo(-6.6, o * 1.15); }
+    g.stroke(); g.restore();
+  };
+  hand(3, -7, -1.75, false); hand(-3, 34, .1, true);
+  // scarf: wrap, stripes, tail across the shoulder
+  const sg = g.createLinearGradient(37, 0, 47, 0); sg.addColorStop(0, COL.scarfD); sg.addColorStop(.5, COL.scarf); sg.addColorStop(1, COL.scarfD);
+  g.fillStyle = sg; rr(g, 37, -14, 10, 28, 4); g.fill();
+  g.strokeStyle = 'rgba(120,80,20,.4)'; g.lineWidth = .55; g.beginPath(); for (let y = -13; y < 14; y += 1.6) { g.moveTo(37.5, y); g.lineTo(46.5, y); } g.stroke();
+  tube(g, [[41, -9], [31, -17], [17, -14]], 6.2, COL.scarf, COL.scarfD, '#f3c869');
+  g.strokeStyle = COL.scarfS; g.lineWidth = 1.2; g.beginPath(); g.moveTo(22.5, -16.8); g.lineTo(21.8, -11.6); g.moveTo(20, -16.4); g.lineTo(19.5, -11.4); g.stroke();
+  g.strokeStyle = COL.scarfD; g.lineWidth = .8; g.beginPath(); for (let i = 0; i < 5; i++) { const y = -16.4 + i * 1.3; g.moveTo(15.4, y); g.lineTo(12.8, y + rand(-.4, .4)); } g.stroke();
+  // ears, face
+  g.fillStyle = COL.skinD; ell(g, HX - 1, -HR + .2, 2.6, 2); ell(g, HX - 1, HR - .2, 2.6, 2);
+  const fg = g.createRadialGradient(HX - 5, HY - 2, 1, HX, HY, HR); fg.addColorStop(0, '#fbe3cc'); fg.addColorStop(.7, COL.skin); fg.addColorStop(1, COL.skinD);
+  g.fillStyle = fg; circ(g, HX, HY, HR);
+  // beanie: crown, ribbed cuff, pompom
+  g.save(); g.beginPath(); g.arc(HX, HY, HR + .9, 0, TAU); g.clip();
+  const bg2 = g.createLinearGradient(HX, 0, HX + 14, 0); bg2.addColorStop(0, COL.bean); bg2.addColorStop(1, COL.beanL);
+  g.fillStyle = bg2; g.fillRect(HX + 1.5, -15, 16, 30);
+  knit(g, HX + 6, -14, HX + 16, 14, 'rgba(90,30,15,.35)', 2.4);
+  g.fillStyle = COL.beanD; g.fillRect(HX + 1, -15, 5, 30);
+  g.strokeStyle = 'rgba(60,20,10,.45)'; g.lineWidth = .55; g.beginPath(); for (let y = -13; y < 14; y += 1.5) { g.moveTo(HX + 1, y); g.lineTo(HX + 6, y); } g.stroke();
+  g.restore();
+  g.strokeStyle = COL.hair; g.lineWidth = .9; g.beginPath();
+  for (const s of [-1, 1]) for (let i = 0; i < 4; i++) { g.moveTo(HX + 1, s * (7.5 + i * .9)); g.quadraticCurveTo(HX - 1.5, s * (8.5 + i), HX - 3.5, s * (8 + i * 1.2)); }
+  g.stroke();
+  fuzzBall(g, HX + 15.5, HY, 5.8, COL.pom, COL.pomD);
+  // closed eyes, brows, nose, smile, cheeks, freckles
+  g.strokeStyle = '#5a3520'; g.lineWidth = 1.05; g.lineCap = 'round'; g.beginPath();
+  for (const s of [-1, 1]) { g.moveTo(HX - 3.4, s * 6.3); g.quadraticCurveTo(HX - 5.6, s * 4.4, HX - 3.4, s * 2.5); }
+  g.stroke();
+  g.lineWidth = .55; g.beginPath();
+  for (const s of [-1, 1]) for (const t of [.25, .5, .75]) { const y = s * lerp(6.1, 2.7, t); g.moveTo(HX - 4.8 + Math.abs(t - .5) * 1.4, y); g.lineTo(HX - 6.2 + Math.abs(t - .5) * 1.4, y); }
+  g.stroke();
+  g.strokeStyle = 'rgba(110,70,40,.75)'; g.lineWidth = .9; g.beginPath();
+  for (const s of [-1, 1]) { g.moveTo(HX - .2, s * 7); g.quadraticCurveTo(HX + .6, s * 4.4, HX - .4, s * 2.2); }
+  g.stroke();
+  g.fillStyle = 'rgba(180,110,80,.35)'; ell(g, HX - 7.6, HY + .3, 1.3, 1.6);
+  g.fillStyle = 'rgba(255,240,225,.7)'; circ(g, HX - 7.2, HY - .6, .55);
+  g.strokeStyle = '#a5524a'; g.lineWidth = .95; g.beginPath(); g.arc(HX - 9.2, HY, 2.1, Math.PI * .58, Math.PI * 1.42); g.stroke();
+  for (const s of [-1, 1]) {
+    const cg = g.createRadialGradient(HX - 7.4, s * 6.6, 0, HX - 7.4, s * 6.6, 3.2); cg.addColorStop(0, 'rgba(236,120,105,.5)'); cg.addColorStop(1, 'rgba(236,120,105,0)');
+    g.fillStyle = cg; circ(g, HX - 7.4, s * 6.6, 3.2);
+  }
+  g.fillStyle = 'rgba(160,90,55,.45)';
+  for (const [fx, fy] of [[-6.4, -3.8], [-7, -5.2], [-5.8, 4], [-6.8, 5.4], [-8, 3.2], [-7.8, -2.8]]) circ(g, HX + fx, fy, .38);
+
+  // standing figure seen from above: shoulders, scarf, head
+  standSpr = canvas(STAND.w * PS, STAND.h * PS);
+  g = standSpr.getContext('2d');
+  g.setTransform(PS, 0, 0, PS, -STAND.x0 * PS, -STAND.y0 * PS);
+  const shoulders = () => { g.beginPath(); g.ellipse(0, 0, 11.5, 19.5, 0, 0, TAU); };
+  shoulders(); const sg2 = g.createRadialGradient(3, -5, 2, 0, 0, 20); sg2.addColorStop(0, COL.swL); sg2.addColorStop(.7, COL.sw); sg2.addColorStop(1, COL.swD);
+  g.fillStyle = sg2; g.fill();
+  g.save(); shoulders(); g.clip(); knit(g, -12, -20, 12, 20, 'rgba(30,50,38,.3)', 2.8); g.restore();
+  g.strokeStyle = COL.scarfD; g.lineWidth = 5.2; g.beginPath(); g.ellipse(1.5, 0, 8.2, 10.6, 0, 0, TAU); g.stroke();
+  g.strokeStyle = COL.scarf; g.lineWidth = 4; g.beginPath(); g.ellipse(1.3, -.2, 8.2, 10.6, 0, 0, TAU); g.stroke();
+  g.strokeStyle = 'rgba(120,80,20,.4)'; g.lineWidth = .5; g.beginPath();
+  for (let a = 0; a < TAU; a += .22) { g.moveTo(1.5 + Math.cos(a) * 6.4, Math.sin(a) * 8.6); g.lineTo(1.5 + Math.cos(a) * 10, Math.sin(a) * 12.6); }
+  g.stroke();
+  const fg2 = g.createRadialGradient(10, -1, .5, 10, 0, 4.5); fg2.addColorStop(0, '#fbe3cc'); fg2.addColorStop(1, COL.skin);
+  g.fillStyle = fg2; ell(g, 9.7, 0, 3.1, 5.2);
+  g.fillStyle = COL.hair; ell(g, 7.5, -7.2, 2.6, 1.6, .5); ell(g, 7.5, 7.2, 2.6, 1.6, -.5);
+  const hb = g.createRadialGradient(0, -2, 1, 2, 0, 10); hb.addColorStop(0, COL.beanL); hb.addColorStop(1, COL.bean);
+  g.fillStyle = hb; circ(g, 2, 0, 9.6);
+  g.save(); g.beginPath(); g.arc(2, 0, 9.6, 0, TAU); g.clip(); knit(g, -8, -10, 12, 10, 'rgba(90,30,15,.3)', 2.2); g.restore();
+  g.strokeStyle = COL.beanD; g.lineWidth = 2.8; g.beginPath(); g.arc(2, 0, 8.3, -1.3, 1.3); g.stroke();
+  g.strokeStyle = 'rgba(60,20,10,.45)'; g.lineWidth = .5; g.beginPath();
+  for (let t = -1.25; t <= 1.25; t += .16) { g.moveTo(2 + Math.cos(t) * 7, Math.sin(t) * 7); g.lineTo(2 + Math.cos(t) * 9.6, Math.sin(t) * 9.6); }
+  g.stroke();
+  fuzzBall(g, -1, 0, 4.6, COL.pom, COL.pomD);
 }
 
 /* ---------- static barn (floor, walls, fixtures) ---------- */
 let floorC = null;
 function buildFloor() {
-  const c = document.createElement('canvas'); c.width = Math.round(WW * FS); c.height = Math.round(WH * FS);
+  const c = canvas(WW * FS, WH * FS);
   const g = c.getContext('2d'); g.scale(FS, FS);
   g.fillStyle = '#b48647'; g.fillRect(0, 0, WW, WH);
   for (let i = 0; i < 260; i++) {
@@ -374,11 +840,6 @@ function buildFloor() {
     const gr = g.createRadialGradient(w.x, w.y, 0, w.x, w.y, 64);
     gr.addColorStop(0, 'rgba(92,60,26,.4)'); gr.addColorStop(1, 'rgba(92,60,26,0)');
     g.fillStyle = gr; g.fillRect(w.x - 64, w.y - 64, 128, 128);
-  }
-  for (const l of lamps) {
-    const gr = g.createRadialGradient(l.x, l.y, 0, l.x, l.y, 90);
-    gr.addColorStop(0, 'rgba(245,215,140,.25)'); gr.addColorStop(1, 'rgba(245,215,140,0)');
-    g.fillStyle = gr; g.fillRect(l.x - 90, l.y - 90, 180, 180);
   }
   const straw = ['#ecc977', '#d8ae5c', '#f3da94', '#c79647', '#a8783a', '#f7e6ad', '#bd8b41', '#e2bd6a'];
   g.lineCap = 'round';
@@ -403,6 +864,9 @@ function buildFloor() {
     g.fillStyle = Math.random() < .5 ? 'rgba(120,80,40,.6)' : 'rgba(205,165,105,.7)';
     circ(g, f.x + Math.cos(a) * d, f.y + Math.sin(a) * d, rand(.6, 1.3));
   }
+  const pg = g.createRadialGradient(1235, 480, 0, 1235, 480, 60);
+  pg.addColorStop(0, 'rgba(80,55,25,.45)'); pg.addColorStop(1, 'rgba(80,55,25,0)');
+  g.fillStyle = pg; g.fillRect(1175, 420, 120, 120);
 
   backWall(g); sideWalls(g);
 
@@ -416,9 +880,11 @@ function buildFloor() {
   gr = g.createLinearGradient(0, 926, 0, 896); gr.addColorStop(0, 'rgba(30,16,6,.4)'); gr.addColorStop(1, 'rgba(30,16,6,0)');
   g.fillStyle = gr; g.fillRect(30, 896, WW - 60, 30);
 
-  bale(g, 32, 160, 142, 240); bale(g, 1168, 160, 1268, 232); bale(g, 32, 520, 88, 660);
-  sacks(g);
-  feeders.forEach(f => feederDraw(g, f)); waterers.forEach(w => watererDraw(g, w)); bucketDraw(g);
+  bale(g, 32, 160, 142, 240); bale(g, 1168, 160, 1268, 232); shavingsBale(g);
+  sacks(g); pumpDraw(g);
+  feeders.forEach(f => { g.fillStyle = 'rgba(40,20,5,.35)'; ell(g, f.x + 3, f.y + 4, f.r + 5, f.r + 4); });
+  waterers.forEach(w => { g.fillStyle = 'rgba(40,20,5,.35)'; ell(g, w.x + 3, w.y + 4, w.r + 4, w.r + 3); });
+  bucketDraw(g);
   return c;
 }
 function backWall(g) {
@@ -446,7 +912,6 @@ function backWall(g) {
   g.fillStyle = '#4a2e1a'; g.fillRect(0, 160, WW, 12);
   g.fillStyle = 'rgba(255,220,170,.1)'; g.fillRect(0, 160, WW, 1.5);
 
-  // sliding barn door
   g.fillStyle = '#2c2522'; g.fillRect(520, 14, 260, 6);
   g.fillStyle = '#4a403a'; circ(g, 572, 17, 4); circ(g, 728, 17, 4);
   for (const [x0, x1] of [[550, 650], [650, 750]]) {
@@ -460,22 +925,13 @@ function backWall(g) {
   }
   g.fillStyle = '#2c2522'; g.fillRect(638, 88, 4, 22); g.fillRect(658, 88, 4, 22);
 
-  // chalkboard
   g.fillStyle = '#8a6040'; rr(g, 924, 40, 118, 80, 3); g.fill();
-  g.fillStyle = '#2f3a34'; g.fillRect(930, 46, 106, 68);
-  g.fillStyle = 'rgba(255,255,255,.05)'; for (let i = 0; i < 6; i++) ell(g, 930 + rand(106), 46 + rand(68), rand(8, 20), rand(3, 6));
-  g.fillStyle = 'rgba(240,238,226,.88)'; g.font = '600 15px Caveat, "Comic Sans MS", cursive';
-  g.fillText('Week 1 chicks', 938, 64); g.fillText('lamps 35°C', 938, 82); g.fillText('water', 938, 100);
-  g.strokeStyle = 'rgba(240,238,226,.88)'; g.lineWidth = 1.6; g.beginPath(); g.moveTo(976, 96); g.lineTo(980, 101); g.lineTo(989, 90); g.stroke();
-  g.fillStyle = '#e8e4d8'; g.fillRect(990, 113, 14, 3);
 
-  // thermometer
   g.fillStyle = '#efe7d6'; rr(g, 770, 34, 16, 86, 7); g.fill();
   g.fillStyle = '#c9c0ae'; g.fillRect(777, 42, 2, 62);
   g.fillStyle = '#c23a2a'; g.fillRect(776.5, 58, 3, 50); circ(g, 778, 110, 4.6);
   g.fillStyle = '#6b5a4a'; for (let y = 44; y < 104; y += 6) g.fillRect(781, y, 3, .8);
 
-  // rope coil on a peg
   g.fillStyle = '#3b2a1e'; g.fillRect(296, 52, 8, 6);
   g.strokeStyle = '#c9a46a'; g.lineWidth = 3;
   for (let k = 0; k < 5; k++) { g.beginPath(); g.ellipse(300, 82 + k * .6, 18 - k * 1.2, 24 - k * 1.3, 0, 0, TAU); g.stroke(); }
@@ -515,6 +971,42 @@ function bale(g, x0, y0, x1, y1) {
   g.fillStyle = 'rgba(255,240,190,.18)'; g.fillRect(x0, y0, w, 2);
   g.fillStyle = 'rgba(60,35,10,.25)'; g.fillRect(x0, y1 - d, w, 2);
 }
+function shavingsBale(g) {
+  // a compressed, plastic-wrapped bale of pine shavings, opened at the top end
+  const { x0, x1, y0, y1 } = strawBale, d = 20, w = x1 - x0;
+  g.fillStyle = 'rgba(40,20,5,.35)'; g.fillRect(x0 + 2, y1 - 3, w + 2, 8);
+  g.fillStyle = '#cbbf97'; g.fillRect(x0, y1 - d, w, d);
+  g.fillStyle = '#ebe2c2'; g.fillRect(x0, y0 + 30, w, y1 - d - y0 - 30);
+  g.fillStyle = '#f2dfa4'; g.fillRect(x0, y0, w, 30);
+  g.lineCap = 'round';
+  for (let i = 0; i < 90; i++) {
+    g.strokeStyle = ['#fbedbf', '#e2c47a', '#fff4d0'][i % 3]; g.lineWidth = rand(.7, 1.3);
+    const x = rand(x0 + 3, x1 - 3), y = rand(y0 + 3, y0 + 27), r = rand(1.2, 3), a = rand(TAU);
+    g.beginPath(); g.arc(x, y, r, a, a + rand(2, 4)); g.stroke();
+  }
+  g.strokeStyle = 'rgba(255,255,255,.55)'; g.lineWidth = 1;
+  for (let y = y0 + 40; y < y1 - d - 6; y += 13) { g.beginPath(); g.moveTo(x0 + 4, y); g.quadraticCurveTo(x0 + w / 2, y + 3, x1 - 4, y - 1); g.stroke(); }
+  g.fillStyle = '#3f7a4a'; g.fillRect(x0 + 10, y0 + 40, w - 20, y1 - d - y0 - 52);
+  g.save(); g.translate(x0 + w / 2, (y0 + 40 + y1 - d - 12) / 2); g.rotate(-Math.PI / 2);
+  g.fillStyle = '#f3ecd2'; g.textAlign = 'center'; g.font = '800 8px Nunito, sans-serif'; g.fillText('PINE SHAVINGS', 0, -2);
+  g.font = '700 5.5px Nunito, sans-serif'; g.fillText('KILN-DRIED · NO CEDAR', 0, 7);
+  g.restore(); g.textAlign = 'left';
+  g.fillStyle = 'rgba(80,60,30,.25)'; g.fillRect(x0, y1 - d, w, 2);
+}
+function drawCrate() {
+  const { x0, x1, y0, y1 } = lampCrate, spare = spareLamps();
+  ctx.fillStyle = 'rgba(40,20,5,.35)'; ctx.fillRect(x0 + 2, y0 + 4, x1 - x0 + 2, y1 - y0);
+  ctx.fillStyle = '#9a6b3e'; ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
+  ctx.fillStyle = '#5c3b20'; ctx.fillRect(x0 + 4, y0 + 4, x1 - x0 - 8, y1 - y0 - 8);
+  for (let i = 0; i < Math.min(spare, 6); i++) {
+    const cx = x0 + 14 + (i % 3) * 17, cy = y0 + 14 + (i / 3 | 0) * 17;
+    ctx.fillStyle = '#a9a49c'; circ(ctx, cx, cy, 7.5); ctx.fillStyle = '#d9d4ca'; circ(ctx, cx - 1.5, cy - 1.5, 3);
+    ctx.fillStyle = '#c8321a'; circ(ctx, cx, cy, 2.6);
+  }
+  ctx.fillStyle = '#b07c4a'; ctx.fillRect(x0, y0, x1 - x0, 3); ctx.fillRect(x0, (y0 + y1) / 2 - 1.5, x1 - x0, 3); ctx.fillRect(x0, y1 - 3, x1 - x0, 3);
+  ctx.fillStyle = '#f2e6cc'; ctx.font = '800 7px Nunito, sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText(`HEAT LAMPS · ${spare}`, (x0 + x1) / 2, y1 + 9); ctx.textAlign = 'left';
+}
 function sacks(g) {
   for (const [x, tilt] of [[785, -.05], [821, .06]]) {
     g.save(); g.translate(x, 190); g.rotate(tilt);
@@ -531,32 +1023,19 @@ function sacks(g) {
   }
   g.textAlign = 'left';
 }
-function feederDraw(g, f) {
-  const { x, y, r } = f;
-  g.fillStyle = 'rgba(40,20,5,.35)'; ell(g, x + 3, y + 4, r + 5, r + 4);
-  g.fillStyle = '#b23d2b'; circ(g, x, y, r + 4);
-  g.fillStyle = '#c7a068'; circ(g, x, y, r);
-  for (let i = 0; i < 50; i++) { const a = rand(TAU), d = rand(r * .6, r - 1); g.fillStyle = Math.random() < .5 ? '#9a7442' : '#e0bf86'; circ(g, x + Math.cos(a) * d, y + Math.sin(a) * d, rand(.6, 1.2)); }
-  g.strokeStyle = '#9c3324'; g.lineWidth = 2.2;
-  for (let i = 0; i < 10; i++) { const a = i / 10 * TAU; g.beginPath(); g.moveTo(x + Math.cos(a) * r * .6, y + Math.sin(a) * r * .6); g.lineTo(x + Math.cos(a) * (r + 3), y + Math.sin(a) * (r + 3)); g.stroke(); }
-  g.strokeStyle = '#d4604a'; g.lineWidth = 1.4; g.beginPath(); g.arc(x, y, r + 3.2, Math.PI * 1.05, Math.PI * 1.7); g.stroke();
-  const gr = g.createRadialGradient(x - 4, y - 4, 1, x, y, r * .6);
-  gr.addColorStop(0, '#f1eee6'); gr.addColorStop(1, '#9b968c');
-  g.fillStyle = gr; circ(g, x, y, r * .58);
-  g.strokeStyle = '#7f7a72'; g.lineWidth = 1.2; g.beginPath(); g.arc(x, y, r * .45, 0, TAU); g.stroke();
-  g.strokeStyle = '#5e5a55'; g.lineWidth = 1.6; g.beginPath(); g.arc(x, y - 1, 4, Math.PI, 0); g.stroke();
-}
-function watererDraw(g, w) {
-  const { x, y, r } = w;
-  g.fillStyle = 'rgba(40,20,5,.35)'; ell(g, x + 3, y + 4, r + 4, r + 3);
-  g.fillStyle = '#9aa4a8'; circ(g, x, y, r + 3);
-  g.fillStyle = '#5e9cb2'; circ(g, x, y, r);
-  g.strokeStyle = 'rgba(190,230,240,.55)'; g.lineWidth = 1.2; g.beginPath(); g.arc(x, y, r - 2.5, Math.PI * 1.1, Math.PI * 1.6); g.stroke();
-  const gr = g.createRadialGradient(x - 3, y - 4, 1, x, y, r * .62);
-  gr.addColorStop(0, '#f3f5f3'); gr.addColorStop(1, '#8d989c');
-  g.fillStyle = gr; circ(g, x, y, r * .62);
-  g.fillStyle = '#6c7579'; circ(g, x, y, 2.2);
-  g.strokeStyle = '#c9d0d2'; g.lineWidth = 1; g.beginPath(); g.arc(x, y, r + 2.5, Math.PI * 1.1, Math.PI * 1.7); g.stroke();
+function pumpDraw(g) {
+  const { x0, x1, y0, y1 } = pump;
+  g.fillStyle = 'rgba(40,20,5,.35)'; rr(g, x0 - 2, y0 + 3, x1 - x0 + 4, y1 - y0, 6); g.fill();
+  g.fillStyle = '#8b8a84'; rr(g, x0, y0, x1 - x0, y1 - y0, 6); g.fill();
+  for (let i = 0; i < 14; i++) { g.fillStyle = Math.random() < .5 ? 'rgba(255,255,255,.08)' : 'rgba(0,0,0,.1)'; ell(g, rand(x0 + 4, x1 - 4), rand(y0 + 4, y1 - 4), rand(2, 6), rand(1.5, 4)); }
+  g.fillStyle = '#4d5a5e'; rr(g, x0 + 6, y0 + 30, 26, 18, 5); g.fill();
+  g.fillStyle = 'rgba(120,170,190,.55)'; rr(g, x0 + 8, y0 + 32, 22, 14, 4); g.fill();
+  g.fillStyle = '#9e3a2a'; circ(g, x0 + 30, y0 + 16, 9);
+  g.fillStyle = '#c4553f'; circ(g, x0 + 28, y0 + 14, 5);
+  g.strokeStyle = '#7d2c20'; g.lineWidth = 4; g.lineCap = 'round';
+  g.beginPath(); g.moveTo(x0 + 30, y0 + 16); g.lineTo(x0 + 8, y0 + 4); g.stroke();
+  g.beginPath(); g.moveTo(x0 + 24, y0 + 22); g.lineTo(x0 + 20, y0 + 34); g.stroke();
+  g.fillStyle = '#2c2522'; circ(g, x0 + 30, y0 + 16, 1.8);
 }
 function bucketDraw(g) {
   const { x, y, r } = bucket;
@@ -570,7 +1049,7 @@ function bucketDraw(g) {
 
 /* ---------- player ---------- */
 const HW = 19, HEAD = 58, FEET = 90, PR = 16, BODYZ = 7;
-const player = { x: 600, y: 610, vx: 0, vy: 0, a: -Math.PI / 2, walk: 0, move: 0, speed: 0, idle: 0, lying: false, lieT: 0, la: 0, lieTime: 0, held: null, walkTo: null, petTarget: null, invited: false, tiptoe: false };
+const player = { x: 600, y: 610, vx: 0, vy: 0, a: -Math.PI / 2, walk: 0, move: 0, speed: 0, idle: 0, lying: false, lieT: 0, la: 0, lieTime: 0, held: null, carry: null, walkTo: null, petTarget: null, invited: false, tiptoe: false };
 let C = null;
 function cap() {
   const p = player, dx = Math.cos(p.la), dy = Math.sin(p.la);
@@ -586,39 +1065,228 @@ function capDist(x, y) {
 const bodyToWorld = (u, w) => [C.cx + C.dx * u - C.dy * w, C.cy + C.dy * u + C.dx * w];
 const bodyW = u => u > 44 ? 7 : u > -14 ? 16 : 13;
 
+/* ---------- needs ---------- */
+let growth = 0, dropAcc = 0;
+const N = { feed: 1, water: 1, bed: 1, air: 1, warm: 1, mood: 1, cold: false, hot: false, hungry: false, thirsty: false };
+function broodDays() { return Math.max(0, (Date.now() - barn.broodStart) / 86400000); }
+function broodWeek() { return Math.min(6, 1 + Math.floor(broodDays())); }
+const targetC = () => Math.max(21, 35 - 3 * (broodWeek() - 1));
+const aliveCount = () => { let n = 0; for (const c of chicks) if (c.s !== 'dead') n++; return n; };
+const openWindows = () => barn.windows.filter(Boolean).length;
+// the barn itself swings from about 10 °C on a spring night to 21 °C by day; open windows cool it, most at night
+const roomC = () => lerp(10, 21, L.day) - openWindows() * (1.2 + 1.8 * (1 - L.day));
+const underC = l => roomC() + LAMP_BOOST[l.h - 1];
+const spareLamps = () => MAX_LAMPS - lamps.length - (player.carry === 'lamp' ? 1 : 0);
+// share of the flock that can get warm: a lamp at brooding temperature covers about 50 chicks
+function coverage() {
+  const n = aliveCount(); if (!n) return 1;
+  const T = targetC(), room = roomC();
+  if (room >= T - 3) return 1;
+  let capacity = 0;
+  for (const l of lamps) { const t = underC(l); capacity += t >= T - 3 ? LAMP_CHICKS : t >= T - 7 ? LAMP_CHICKS * .4 : 0; }
+  return clamp(capacity / n, 0, 1);
+}
+function addDropping(live) {
+  let x, y;
+  if (live && chicks.length) {
+    const c = chicks[(Math.random() * chicks.length) | 0];
+    if (!isGround(c) || c.s === 'dead') return;
+    x = c.x - Math.cos(c.a) * c.r; y = c.y - Math.sin(c.a) * c.r;
+  } else {
+    const r = Math.random(), a = rand(TAU);
+    if (r < .5) { const l = lamps.length ? lamps[(Math.random() * lamps.length) | 0] : { x: 650, y: 560 }, d = Math.sqrt(Math.random()) * 75; x = l.x + Math.cos(a) * d; y = l.y + Math.sin(a) * d; }
+    else if (r < .75) { const f = circles[(Math.random() * 7) | 0], d = f.r + rand(8, 50); x = f.x + Math.cos(a) * d; y = f.y + Math.sin(a) * d; }
+    else { x = rand(B.x0 + 10, B.x1 - 10); y = rand(B.y0 + 10, B.y1 - 10); }
+  }
+  if (x < B.x0 || x > B.x1 || y < B.y0 || y > B.y1) return;
+  barn.droppings.push({ x, y, rot: rand(TAU) });
+  if (barn.droppings.length > 320) barn.droppings.shift();
+}
+function cozyHold() {
+  // a farmhand does the chores in cozy mode
+  for (let i = 0; i < barn.feed.length; i++) barn.feed[i] = Math.max(barn.feed[i], .85);
+  for (let i = 0; i < barn.water.length; i++) { barn.water[i] = Math.max(barn.water[i], .9); barn.dirt[i] = Math.min(barn.dirt[i], .1); }
+  if (barn.droppings.length > 40) barn.droppings.splice(0, barn.droppings.length - 40);
+  barn.air = Math.max(barn.air, .9); barn.dryFor = barn.hungryFor = 0;
+  for (const c of chicks) c.pasty = 0;
+}
+const HR = 3600;
+function tickNeeds(sec, live) {
+  if (sec <= 0) return;
+  const now = Date.now();
+  barn.fresh = barn.fresh.filter(p => now - p.t < 6 * 3600e3);
+  if (!care()) { cozyHold(); if (live && Math.random() < sec * .05) addDropping(true); return; }
+  // Care mode runs about 7x faster than life: tending twice a day is enough
+  const n = aliveCount(), k = n / 300, eat = k * (1 + growth * .2);
+  for (let i = 0; i < barn.feed.length; i++) barn.feed[i] = Math.max(0, barn.feed[i] - sec * eat / (20 * HR));
+  for (let i = 0; i < barn.water.length; i++) {
+    barn.water[i] = Math.max(0, barn.water[i] - sec * eat / (16 * HR));
+    barn.dirt[i] = Math.min(1, barn.dirt[i] + sec * k / (8 * HR));
+  }
+  dropAcc += sec * n * .03 * (1 + growth * .4) / HR;
+  const nd = Math.min(400, Math.floor(dropAcc)); dropAcc -= nd;
+  for (let i = 0; i < nd; i++) addDropping(live);
+  const bed = 1 - Math.min(1, barn.droppings.length / 220), open = openWindows();
+  const aT = clamp(1 - .75 * (1 - bed) - (open ? 0 : .15) + .08 * open, 0, 1);
+  barn.air += (aT - barn.air) * (1 - Math.exp(-sec / 600));
+  if (!n) return;
+
+  // losses. Rates are per hour and tuned to be forgiving for a break or two, harsh for a whole neglected night.
+  const cover = coverage(), week = broodWeek();
+  const water = barn.water.reduce((a, v) => a + v, 0), feed = barn.feed.reduce((a, v) => a + v, 0);
+  barn.dryFor = water < .02 ? barn.dryFor + sec : 0;
+  barn.hungryFor = feed < .02 ? barn.hungryFor + sec : 0;
+  const rates = {
+    cold: n * (1 - cover) * .03,
+    thirst: barn.dryFor > 1.5 * HR ? n * .012 : 0,
+    hunger: barn.hungryFor > 3 * HR ? n * .008 : 0,
+    air: barn.air < .3 ? n * .004 : 0,
+    weak: week === 1 ? n * .0008 : 0,
+  };
+  for (const cause in rates) {
+    barn.acc[cause] = (barn.acc[cause] || 0) + rates[cause] * sec / HR;
+    while (barn.acc[cause] >= 1) { barn.acc[cause] -= 1; if (!killOne(cause, live)) { barn.acc[cause] = 0; break; } }
+  }
+  // pasty butt: week one and two, worse under heat stress; untreated it's fatal within about ten hours here
+  if (week <= 2) {
+    barn.acc.pasty = (barn.acc.pasty || 0) + n * .0012 * (cover < .97 ? 2 : 1) * sec / HR;
+    while (barn.acc.pasty >= 1) {
+      barn.acc.pasty -= 1;
+      const pool = chicks.filter(c => c.s !== 'dead' && !c.pasty && c.s !== 'held');
+      if (pool.length) pool[(Math.random() * pool.length) | 0].pasty = 10 * HR;
+    }
+  }
+  for (let i = chicks.length - 1; i >= 0; i--) {
+    const c = chicks[i];
+    if (!c.pasty || c.s === 'dead') continue;
+    c.pasty -= sec;
+    if (c.pasty <= 0) { c.pasty = 0; die(c, 'pasty', live); }
+  }
+}
+// long absences are replayed in ten-minute steps so a cold night is felt as a cold night
+function catchUp(sec) {
+  const keep = dayP; let t = Date.now() - sec * 1000;
+  while (sec > 0) {
+    const s = Math.min(600, sec); t += s * 1000;
+    if (settings.time === 'real') { dayP = clockP(new Date(t)); updateLight(); }
+    tickNeeds(s, false); sec -= s;
+  }
+  dayP = keep; updateLight();
+}
+const CAUSE = {
+  cold: ['from the cold', 'Chilled chicks pile up and can smother. Hang more lamps or lower them on cold nights.'],
+  thirst: ['from thirst', 'Chicks dehydrate quickly. Real ones need fresh water at all times.'],
+  hunger: ['from hunger', 'Keep starter feed available around the clock.'],
+  air: ['from bad air', 'Ammonia from dirty bedding damages young lungs. Freshen the shavings and ventilate.'],
+  pasty: ['of pasty butt', 'Dried droppings sealed its vent. Check vents daily in the first weeks and clean them with a warm damp cloth.'],
+  weak: ['in its first week', 'A few chicks fail to thrive even with good care. It is sad, and it is normal.'],
+};
+function killOne(cause, live) {
+  const pool = chicks.filter(c => c.s !== 'dead' && c.s !== 'held');
+  if (!pool.length) return false;
+  let c = pool[(Math.random() * pool.length) | 0];
+  if (cause === 'cold') { // the ones furthest from a lamp
+    const dist = k => lamps.length ? Math.min(...lamps.map(l => Math.hypot(l.x - k.x, l.y - k.y))) : 0;
+    for (let i = 0; i < 6; i++) { const k = pool[(Math.random() * pool.length) | 0]; if (dist(k) > dist(c)) c = k; }
+  }
+  die(c, cause, live); return true;
+}
+let lastDeathToast = -1e9;
+function die(c, cause, live) {
+  if (player.held === c) { player.held = null; player.carry = null; }
+  barn.lost++; barn.causes[cause] = (barn.causes[cause] || 0) + 1;
+  if (c.name) { barn.lostNames.push(c.name); if (barn.lostNames.length > 20) barn.lostNames.shift(); }
+  if (!live) { const i = chicks.indexOf(c); if (i >= 0) chicks.splice(i, 1); return; }
+  c.s = 'dead'; c.cause = cause; c.sl = false; c.pasty = 0; c.z = 0; c.vz = 0; c.vx = c.vy = 0; c.sd = null;
+  if (c.name || time - lastDeathToast > 45) { lastDeathToast = time; toast(`${c.name || 'A chick'} died ${CAUSE[cause][0]}.`); }
+}
+function evalNeeds() {
+  N.feed = clamp(barn.feed.reduce((s, v) => s + v, 0) / 1.6, 0, 1);
+  N.water = clamp(barn.water.reduce((s, v, i) => s + v * (1 - .6 * barn.dirt[i]), 0) / 2, 0, 1);
+  N.bed = 1 - Math.min(1, barn.droppings.length / 220);
+  N.air = barn.air;
+  N.cover = care() ? coverage() : 1;
+  N.target = targetC();
+  N.lampC = lamps.length ? lamps.reduce((s, l) => s + underC(l), 0) / lamps.length : roomC();
+  N.cold = N.cover < .97;
+  N.hot = care() && !N.cold && N.lampC > N.target + 10;
+  N.warm = clamp(N.cover - (N.hot ? .25 : 0), 0, 1);
+  N.hungry = N.feed < .12; N.thirsty = N.water < .12;
+  N.mood = (N.feed * 1.2 + N.water * 1.2 + N.bed + N.air * .8 + N.warm * 1.2) / 5.4;
+  if (N.cold) N.mood = Math.min(N.mood, .4 + N.cover * .2);
+  if (chicks.some(c => c.s === 'dead')) N.mood = Math.min(N.mood, .45);
+  growth = clamp(broodDays() / 6, 0, 1);
+}
+function topIssue() {
+  if (!care()) return null;
+  const dead = chicks.filter(c => c.s === 'dead').length;
+  if (dead) return [0, dead === 1 ? 'A chick has died. Remove it, then check the conditions.' : `${dead} chicks have died. Remove them and check the conditions.`, 'losses'];
+  if (N.cold) return [0, lamps.length * LAMP_CHICKS < aliveCount()
+    ? `Not enough heat: ${lamps.length} lamps warm about ${lamps.length * LAMP_CHICKS} chicks.`
+    : 'The chicks are chilly. Lower the lamps or close windows.', 'chilly'];
+  if (chicks.some(c => c.pasty && c.s !== 'dead')) return [.2, 'A chick looks unwell: hunched and alone.', 'sick chick'];
+  const list = [
+    [N.feed, 'The feeders are running low.', 'feeders low'],
+    [N.water, barn.water.reduce((s, v) => s + v, 0) < 1.4 ? 'The waterers need filling.' : 'The water has gone cloudy.', 'water'],
+    [N.bed, 'The bedding could use fresh shavings.', 'bedding'],
+    [N.air, 'It smells of ammonia. Freshen bedding, open a window.', 'stuffy'],
+    [N.hot ? .5 : 1, 'It\'s hot under the lamps. Raise them a notch.', 'too warm'],
+  ];
+  list.sort((a, b) => a[0] - b[0]);
+  return list[0][0] < .55 ? list[0] : null;
+}
+
 /* ---------- chicks ---------- */
 const chicks = [];
-const seeds = [], flying = [], hearts = [], zzz = [], puffs = [];
+const seeds = [], flying = [], hearts = [], zzz = [], puffs = [], drops = [];
 const motes = [];
 let stats = { sleeping: 0, snug: 0, on: 0 };
 const GROUNDLESS = { onbody: 1, climb: 1, held: 1 };
 const isGround = c => !GROUNDLESS[c.s];
+const chickR = c => 6 * c.size * (1 + .45 * growth);
 
-function makeChick(x, y) {
-  const size = rand(.86, 1.14);
-  return {
-    x, y, px: x, py: y, vx: 0, vy: 0, a: rand(TAU), h: rand(TAU), r: 6 * size, v: pickVariant(),
+function makeChick(x, y, data) {
+  const size = data ? data[1] : rand(.86, 1.14);
+  const c = {
+    x, y, px: x, py: y, vx: 0, vy: 0, a: rand(TAU), h: rand(TAU), size, r: 6 * size, v: data ? data[0] % VARIANTS.length : pickVariant(),
+    name: data && data[2] ? String(data[2]).slice(0, 16) : '', band: data ? (data[3] | 0) % BANDS.length : 0, hl: 0,
     s: 'wander', t: rand(.3, 3), anim: rand(20), ph: rand(TAU), z: 0, vz: 0,
     tx: x, ty: y, fx: 0, fy: 0, face: false, next: 'idle', nt: 1, arr: 5, spd: 20,
-    peep: 0, happy: 0, tired: rand(.5), fond: 0, sd: null, eat: false, pk: false,
+    pasty: data && data[4] > 0 ? data[4] : 0, peep: 0, happy: 0, tired: rand(.5), fond: 0, sd: null, eat: false, pk: false,
     u: 0, w: 0, tu: 0, tw: 0, cl: 0, sx: 0, sy: 0, sl: false, stuck: 0, mv: 0, g: true, m: 1,
     pitch: rand(.92, 1.12) / Math.sqrt(size),
   };
+  c.r = chickR(c);
+  return c;
 }
-function spawnFlock(n) {
-  if (player.held) player.held = null;
+function placeChick(c, i, n) {
+  const near = i < n * .3;
+  if (near) { const l = lamps.length ? lamps[i % lamps.length] : { x: 650, y: 560 }, a = rand(TAU), r = Math.sqrt(Math.random()) * 62; c.x = l.x + Math.cos(a) * r; c.y = l.y + Math.sin(a) * r; c.s = 'sleep'; c.t = rand(4, 25); }
+  else { c.x = rand(B.x0 + 10, B.x1 - 10); c.y = rand(B.y0 + 10, B.y1 - 10); c.spd = rand(14, 24); }
+  c.px = c.x; c.py = c.y;
+  resolveGround(c, c.r);
+}
+function spawnFlock(n, saved) {
+  if (player.held) { player.held = null; player.carry = null; }
   chicks.length = 0;
+  if (saved) n = saved.length;
   for (let i = 0; i < n; i++) {
-    let x, y; const near = i < n * .3;
-    if (near) { const l = lamps[i % lamps.length], a = rand(TAU), r = Math.sqrt(Math.random()) * 62; x = l.x + Math.cos(a) * r; y = l.y + Math.sin(a) * r; }
-    else { x = rand(B.x0 + 10, B.x1 - 10); y = rand(B.y0 + 10, B.y1 - 10); }
-    const c = makeChick(x, y);
-    if (near) { c.s = 'sleep'; c.t = rand(4, 25); }
-    else c.spd = rand(14, 24);
-    resolveGround(c, c.r);
-    chicks.push(c);
+    const c = makeChick(0, 0, saved && saved[i]);
+    placeChick(c, i, n); chicks.push(c);
   }
   for (let k = 0; k < 4; k++) separate();
+}
+function resizeFlock(n) {
+  if (player.lying) standUp();
+  if (player.held) { const c = player.held; player.held = null; player.carry = null; enter(c, 'idle', 1); }
+  if (n > chicks.length) {
+    const start = chicks.length;
+    for (let i = start; i < n; i++) { const c = makeChick(0, 0); placeChick(c, i, n); chicks.push(c); }
+  } else {
+    const named = chicks.filter(c => c.name), plain = chicks.filter(c => !c.name);
+    chicks.length = 0;
+    chicks.push(...named.slice(0, n), ...plain.slice(0, Math.max(0, n - named.length)));
+  }
 }
 function enter(c, s, t) { c.s = s; c.t = t; c.eat = false; }
 function goTo(c, x, y, next, nt, spd, arr, fx, fy) {
@@ -640,12 +1308,20 @@ function nearestSeed(x, y, R) {
 }
 function toSeed(c, s) { c.s = 'seed'; c.sd = s; c.t = 8; c.spd = rand(55, 80); c.eat = false; c.sl = false; }
 function goLamp(c, nt) {
+  if (N.hot) { // spread out away from the lamps when it's too warm
+    let x, y, tries = 0;
+    do { x = rand(B.x0 + 20, B.x1 - 20); y = rand(B.y0 + 20, B.y1 - 20); tries++; } while (tries < 8 && lamps.some(l => Math.hypot(l.x - x, l.y - y) < 170));
+    goTo(c, x, y, 'sleep', nt * .6, rand(24, 34), 8); return;
+  }
+  if (!lamps.length) { enter(c, 'sleep', nt); return; }
   const l = Math.random() < .8 ? nearest(lamps, c.x, c.y) : lamps[(Math.random() * lamps.length) | 0];
-  const a = rand(TAU), r = Math.sqrt(Math.random()) * 58;
+  const a = rand(TAU), r = Math.sqrt(Math.random()) * LAMP_R[l.h - 1] * (N.cold ? .6 : 1);
   goTo(c, l.x + Math.cos(a) * r, l.y + Math.sin(a) * r, 'sleep', nt, rand(26, 40), 6);
 }
-function goRing(c, list, next, nt) {
-  const f = Math.random() < .75 ? nearest(list, c.x, c.y) : list[(Math.random() * list.length) | 0];
+function goRing(c, list, levels, next, nt) {
+  const full = levels ? list.filter((o, i) => levels[i] > .05) : list;
+  const pool = full.length ? full : list;
+  const f = Math.random() < .75 ? nearest(pool, c.x, c.y) : pool[(Math.random() * pool.length) | 0];
   const a = Math.atan2(c.y - f.y, c.x - f.x) + rand(-.9, .9), d = f.r + c.r + 4;
   goTo(c, f.x + Math.cos(a) * d, f.y + Math.sin(a) * d, next, nt, rand(26, 38), 4, f.x, f.y);
 }
@@ -657,11 +1333,15 @@ function goSun(c) {
 function pickNext(c) {
   const p = player, n = 1 - L.day;
   c.sl = false; c.face = false;
+  if (c.pasty) { enter(c, 'idle', rand(3, 6)); if (Math.random() < .4) peepAt(c, 'cheep'); return; }
   const s = nearestSeed(c.x, c.y, 260);
   if (s) { toSeed(c, s); return; }
   const dp = Math.hypot(c.x - p.x, c.y - p.y);
   if (p.lying && p.lieT > .6 && stats.snug < chicks.length * .6) {
     if (Math.random() < clamp(.35 + p.lieTime * .02, 0, .9) * (dp < 450 ? 1 : .45)) { enter(c, 'snug', 14); c.spd = rand(38, 62); c.stuck = 0; return; }
+  }
+  if (bird.on && bird.state === 'hop' && Math.hypot(bird.x - c.x, bird.y - c.y) < 200 && Math.random() < .3) {
+    const a = rand(TAU); goTo(c, bird.x + Math.cos(a) * 28, bird.y + Math.sin(a) * 28, 'idle', rand(1.5, 3), rand(30, 45), 6, bird.x, bird.y); return;
   }
   if (!p.lying && p.idle > 1.5 && dp < 220 && Math.random() < .25) {
     const a = rand(TAU), d = PR + c.r + 3;
@@ -670,22 +1350,24 @@ function pickNext(c) {
   if (!p.lying && c.fond > .2 && dp < 420 && Math.random() < c.fond * .6) {
     enter(c, 'follow', rand(3, 7)); c.fx = rand(0, 45); c.fy = rand(-28, 28); return;
   }
-  const drowsy = n * .85 + c.tired * .5;
+  const drowsy = n * .85 + c.tired * .5 + (N.cold ? .35 : 0) - (N.hot ? .1 : 0);
   if (Math.random() < drowsy * .55) { goLamp(c, rand(12, 28) * (1 + n * 2.5)); return; }
   const r = Math.random();
+  const fresh = barn.fresh.length && Date.now() - barn.fresh[barn.fresh.length - 1].t < 15 * 60e3 ? barn.fresh[barn.fresh.length - 1] : null;
   if (r < .04) { enter(c, 'zoom', rand(.8, 1.6)); c.h = rand(TAU); c.vz = 110; return; }
-  if (r < .12) { goRing(c, feeders, 'peck', rand(3, 8)); return; }
-  if (r < .17) { goRing(c, waterers, 'drink', rand(2.5, 5)); return; }
-  if (r < .23 && L.day > .6) { goSun(c); return; }
-  if (r < .45) { enter(c, 'peck', rand(1, 3.5)); return; }
-  if (r < .6) { enter(c, 'idle', rand(.8, 3)); return; }
-  if (r < .63) { enter(c, 'nap', rand(3, 8)); return; }
+  if (r < (N.hungry ? .3 : .12)) { goRing(c, feeders, barn.feed, 'peck', rand(3, 8)); return; }
+  if (r < (N.hungry ? .36 : N.thirsty ? .3 : .17)) { goRing(c, waterers, barn.water, 'drink', rand(2.5, 5)); return; }
+  if (fresh && r < .25) { const a = rand(TAU), d = Math.sqrt(Math.random()) * 80; goTo(c, fresh.x + Math.cos(a) * d, fresh.y + Math.sin(a) * d, 'peck', rand(2, 5), rand(30, 45), 6); return; }
+  if (r < .28 && L.day > .6 && !N.hot) { goSun(c); return; }
+  if (r < .48) { enter(c, 'peck', rand(1, 3.5)); return; }
+  if (r < .62) { enter(c, 'idle', rand(.8, 3)); return; }
+  if (r < .65) { enter(c, 'nap', rand(3, 8)); return; }
   enter(c, 'wander', rand(1.5, 4)); c.h = c.a + rand(-1, 1); c.spd = rand(14, 24);
 }
 function startClimb(c) {
   const bu = (c.x - C.cx) * C.dx + (c.y - C.cy) * C.dy;
   const bwv = -(c.x - C.cx) * C.dy + (c.y - C.cy) * C.dx;
-  const u = clamp(bu, -82, 60), bw = bodyW(u);
+  const u = clamp(bu, -82, 36), bw = bodyW(u);
   c.u = c.tu = u; c.w = c.tw = clamp(bwv * .35, -bw, bw);
   c.s = 'climb'; c.cl = 0; c.sx = c.x; c.sy = c.y; c.sl = false;
 }
@@ -703,9 +1385,11 @@ function hopOff(c) {
 
 function updateChick(c, dt) {
   const p = player;
+  if (c.s === 'dead') { c.g = true; c.m = .05; return; }
   c.mv = Math.hypot(c.x - c.px, c.y - c.py) / dt; c.px = c.x; c.py = c.y;
   c.anim += dt;
   if (c.peep > 0) c.peep -= dt;
+  if (c.hl > 0) c.hl -= dt;
   if (c.happy > 0) c.happy = Math.max(0, c.happy - dt * .9);
   if (c.fond > 0) c.fond = Math.max(0, c.fond - dt * .012);
   if (c.vz !== 0 || (c.z > 0 && isGround(c))) { c.vz -= 520 * dt; c.z += c.vz * dt; if (c.z <= 0) { c.z = 0; c.vz = 0; } }
@@ -794,7 +1478,7 @@ function updateChick(c, dt) {
         if (c.sl) { c.sl = false; c.t = rand(2, 6); }
         else if (Math.random() < .1) { hopOff(c); break; }
         else if (Math.random() < .5) { c.sl = true; c.t = rand(8, 24); }
-        else { c.tu = clamp(c.u + rand(-18, 18), -82, 60); const bw = bodyW(c.tu); c.tw = clamp(c.w + rand(-8, 8), -bw, bw); c.t = rand(1.5, 4); }
+        else { c.tu = clamp(c.u + rand(-18, 18), -82, 36); const bw = bodyW(c.tu); c.tw = clamp(c.w + rand(-8, 8), -bw, bw); c.t = rand(1.5, 4); }
       }
       if (!c.sl) {
         const du = c.tu - c.u, dw = c.tw - c.w, d = Math.hypot(du, dw);
@@ -803,6 +1487,7 @@ function updateChick(c, dt) {
           c.a = angLerp(c.a, Math.atan2(C.dy * du + C.dx * dw, C.dx * du - C.dy * dw), .15);
         }
       }
+      c.u = clamp(c.u, -82, 38);
       const bw = bodyW(c.u); c.w = clamp(c.w, -bw, bw);
       const [bx, by] = bodyToWorld(c.u, c.w); c.x = bx; c.y = by; c.z = BODYZ;
       break;
@@ -820,7 +1505,6 @@ function updateChick(c, dt) {
     c.x += c.vx * dt; c.y += c.vy * dt;
     const sp = Math.hypot(c.vx, c.vy);
     if (sp > 4 && !c.eat && c.s !== 'nestle') c.a = angLerp(c.a, Math.atan2(c.vy, c.vx), Math.min(1, dt * 10));
-    // reactions to a walking person
     if (!p.lying && p.lieT < .3) {
       const dx = c.x - p.x, dy = c.y - p.y, d2 = dx * dx + dy * dy;
       if (d2 < 2500 && p.speed > 20) {
@@ -872,8 +1556,7 @@ function collideChick(c) {
   if (resolveGround(c, c.r) && (c.s === 'wander' || c.s === 'zoom' || c.s === 'flee')) c.h += Math.PI * rand(.5, 1);
 }
 
-/* spatial hash separation */
-const CELL = 14, GC = Math.ceil(WW / CELL) + 1, GR = Math.ceil(WH / CELL) + 1;
+const CELL = 18, GC = Math.ceil(WW / CELL) + 1, GR = Math.ceil(WH / CELL) + 1;
 const gHead = new Int32Array(GC * GR);
 let gNext = new Int32Array(1024);
 function separate() {
@@ -926,6 +1609,70 @@ function separateOnBody() {
   }
 }
 
+/* ---------- sparrow ---------- */
+const bird = { on: false, x: 0, y: 0, z: 0, sx: 0, sy: 0, tx: 0, ty: 0, t: 0, dur: 1, state: 'in', life: 0, hopT: 0, a: 0, win: 0, flap: 0 };
+function sparrowIn() {
+  const open = barn.windows.map((o, i) => o ? i : -1).filter(i => i >= 0);
+  if (!open.length || bird.on) return;
+  const w = open[(Math.random() * open.length) | 0];
+  Object.assign(bird, { on: true, state: 'in', win: w, sx: windowsX[w], sy: 80, tx: windowsX[w] + rand(-120, 120), ty: rand(260, 460), t: 0, dur: 1.4, life: rand(25, 45), z: 0 });
+  bird.a = Math.atan2(bird.ty - bird.sy, bird.tx - bird.sx);
+  chirp();
+}
+function updateBird(dt) {
+  if (!bird.on) return;
+  bird.flap += dt;
+  if (bird.state === 'in' || bird.state === 'out') {
+    bird.t += dt / bird.dur;
+    const t = Math.min(1, bird.t);
+    bird.x = lerp(bird.sx, bird.tx, t); bird.y = lerp(bird.sy, bird.ty, t);
+    bird.z = bird.state === 'in' ? Math.sin(Math.PI * t) * 60 + (1 - t) * 40 : Math.sin(Math.PI * t) * 60 + t * 40;
+    if (t >= 1) {
+      if (bird.state === 'out') { bird.on = false; return; }
+      bird.state = 'hop'; bird.z = 0; bird.hopT = .5;
+      for (const c of chicks) if (isGround(c) && (c.s === 'wander' || c.s === 'idle' || c.s === 'peck') && Math.hypot(c.x - bird.x, c.y - bird.y) < 160 && Math.random() < .5) {
+        const a = rand(TAU); goTo(c, bird.x + Math.cos(a) * 30, bird.y + Math.sin(a) * 30, 'idle', rand(1.5, 3), rand(30, 45), 6, bird.x, bird.y);
+      }
+    }
+    return;
+  }
+  bird.life -= dt; bird.hopT -= dt;
+  if (bird.z > 0 || bird.vz) { bird.vz = (bird.vz || 0) - 500 * dt; bird.z = Math.max(0, bird.z + bird.vz * dt); if (bird.z === 0) bird.vz = 0; }
+  if (bird.hopT < 0) {
+    bird.hopT = rand(.3, .9);
+    if (Math.random() < .6) {
+      const a = bird.a + rand(-1.2, 1.2), d = rand(6, 16);
+      bird.x = clamp(bird.x + Math.cos(a) * d, B.x0 + 10, B.x1 - 10); bird.y = clamp(bird.y + Math.sin(a) * d, B.y0 + 10, B.y1 - 10);
+      bird.a = a; bird.vz = 90; bird.z = .1;
+    }
+    if (Math.random() < .25) chirp(.6);
+  }
+  const scared = !player.lying && Math.hypot(player.x - bird.x, player.y - bird.y) < 55 && player.speed > 30;
+  if (bird.life < 0 || scared) {
+    bird.state = 'out'; bird.sx = bird.x; bird.sy = bird.y; bird.tx = windowsX[bird.win]; bird.ty = 80; bird.t = 0; bird.dur = 1.1;
+    bird.a = Math.atan2(bird.ty - bird.sy, bird.tx - bird.sx); chirp();
+  }
+}
+function drawBird() {
+  if (!bird.on) return;
+  const flying = bird.state !== 'hop';
+  worldT(); ctx.fillStyle = 'rgba(60,35,10,.22)'; ell(ctx, bird.x, bird.y + 2, 6, 4);
+  localT(bird.x, bird.y - bird.z * .55, bird.a, 1 + bird.z * .006);
+  if (flying) {
+    const f = Math.sin(bird.flap * 30);
+    ctx.fillStyle = '#6e5238';
+    for (const s of [-1, 1]) { ctx.beginPath(); ctx.moveTo(1, 0); ctx.quadraticCurveTo(-2, s * (9 + f * 4), -7, s * (11 + f * 5)); ctx.quadraticCurveTo(-4, s * 4, -2, 0); ctx.fill(); }
+  }
+  ctx.fillStyle = '#5b4330'; ctx.beginPath(); ctx.moveTo(-6, 0); ctx.lineTo(-12, -2.2); ctx.lineTo(-12, 2.2); ctx.fill();
+  ctx.fillStyle = '#8a6a4a'; ell(ctx, -1, 0, 6.5, 4.2);
+  ctx.fillStyle = '#6e5238'; ell(ctx, -2, -2.6, 4, 1.6, -.2); ell(ctx, -2, 2.6, 4, 1.6, .2);
+  ctx.strokeStyle = '#3d2c1e'; ctx.lineWidth = .5; ctx.beginPath(); for (const x of [-4, -2, 0]) { ctx.moveTo(x, -3); ctx.lineTo(x - 1.2, -1.5); ctx.moveTo(x, 3); ctx.lineTo(x - 1.2, 1.5); } ctx.stroke();
+  ctx.fillStyle = '#a3917e'; circ(ctx, 5, 0, 3.4);
+  ctx.fillStyle = '#6b4a30'; ell(ctx, 4.6, 0, 2.6, 1.6);
+  ctx.fillStyle = '#2a201a'; ctx.beginPath(); ctx.moveTo(7.8, -.9); ctx.lineTo(10, 0); ctx.lineTo(7.8, .9); ctx.fill();
+  circ(ctx, 6, -2.2, .6); circ(ctx, 6, 2.2, .6);
+}
+
 /* ---------- player actions ---------- */
 function fitLie(x, y, a) {
   const dx = Math.cos(a), dy = Math.sin(a), m = HW + 4;
@@ -951,15 +1698,17 @@ function lieDown() {
   let found = null;
   for (let k = 0; k < 18 && !found; k++) found = fitLie(p.x, p.y, base + (k % 2 ? 1 : -1) * Math.ceil(k / 2) * .35);
   if (!found) { toast('Not enough room here. Find a clear patch of straw.'); return; }
+  if (p.carry && p.carry !== 'chick') { toast(`You set the ${ITEM_NAME[p.carry]} aside.`); p.carry = null; }
   p.la = found.a; p.x = found.x; p.y = found.y;
   p.lying = true; p.lieTime = 0; p.invited = false;
   C = cap();
   if (p.held) {
-    const c = p.held; p.held = null;
+    const c = p.held; p.held = null; p.carry = null;
     c.s = 'onbody'; c.u = c.tu = 22; c.w = c.tw = 0; c.sl = true; c.t = rand(8, 16); c.z = BODYZ;
   }
   for (let i = 0; i < 14; i++) puffs.push({ x: p.x + rand(-40, 40), y: p.y + rand(-30, 30), vx: rand(-40, 40), vy: rand(-40, 40), z: 0, vz: rand(40, 90), rot: rand(TAU), life: 1, col: Math.random() < .5 ? '#ecc977' : '#c79647' });
   rustle(.9);
+  closeNamer();
   updateButtons();
 }
 function standUp() {
@@ -1001,7 +1750,7 @@ function scatter() {
   tossSound(); excite = 1.2;
   const cx = p.lying ? p.x : ox, cy = p.lying ? p.y : oy;
   for (const c of chicks) {
-    if (!isGround(c) || c.s === 'seed') continue;
+    if (!isGround(c) || c.s === 'seed' || c.s === 'dead') continue;
     const d = Math.hypot(c.x - cx, c.y - cy);
     if (d > 300) continue;
     const asleep = c.s === 'sleep' || c.s === 'nap' || c.sl;
@@ -1021,27 +1770,168 @@ function petCat() {
   hearts.push({ x: cat.x - 12, y: cat.y - 10, z: 8, vz: 22, life: 1.5, max: 1.5 });
   purr();
 }
-function toggleHold() {
+
+/* tending: everything E can do, chosen by what's within reach */
+const ITEM_NAME = { scoop: 'feed scoop', pail: 'pail', straw: 'shavings', lamp: 'heat lamp' };
+let useCtx = null;
+function nearRect(q, R) { const p = player, cx = clamp(p.x, q.x0, q.x1), cy = clamp(p.y, q.y0, q.y1); return Math.hypot(p.x - cx, p.y - cy) < R; }
+function nearIdx(list, extra) {
+  const p = player; let best = -1, bd = Infinity;
+  list.forEach((o, i) => { const d = Math.hypot(p.x - o.x, p.y - o.y) - o.r; if (d < PR + extra && d < bd) { bd = d; best = i; } });
+  return best;
+}
+function nearestChickToHands(pick) {
+  const p = player, hx = p.x + Math.cos(p.a) * 20, hy = p.y + Math.sin(p.a) * 20;
+  let best = null, bd = 44 * 44;
+  for (const c of chicks) { if (!isGround(c) || !pick(c)) continue; const d2 = (c.x - hx) ** 2 + (c.y - hy) ** 2; if (d2 < bd) { bd = d2; best = c; } }
+  return best;
+}
+function computeUse() {
   const p = player;
-  if (p.lying || p.lieT > .2) return;
-  if (p.held) {
-    const c = p.held; p.held = null;
-    c.x = p.x + Math.cos(p.a) * (PR + c.r + 4); c.y = p.y + Math.sin(p.a) * (PR + c.r + 4);
-    c.z = 10; c.vz = 40; c.px = c.x; c.py = c.y; c.sl = false;
-    resolveGround(c, c.r); enter(c, 'idle', rand(.6, 1.5));
-    c.fond = Math.min(1, c.fond + .3); peepAt(c, 'happy');
-    updateButtons(); return;
+  if (p.lying || p.lieT > .2) return null;
+  const item = p.carry;
+  if (item === 'chick') return p.held && p.held.pasty ? { id: 'clean', label: 'Clean its vent' } : { id: 'drop', label: 'Put down' };
+  if (item === 'lamp') {
+    if (nearRect(lampCrate, PR + 18)) return { id: 'stow', label: 'Put lamp back' };
+    const bad = lamps.some(l => Math.hypot(l.x - p.x, l.y - p.y) < 100);
+    return bad ? { id: 'none', label: 'Too close to another lamp' } : { id: 'hang', label: 'Hang lamp here' };
   }
-  const hx = p.x + Math.cos(p.a) * 20, hy = p.y + Math.sin(p.a) * 20;
-  let best = null, bd = 48 * 48;
-  for (const c of chicks) { if (!isGround(c)) continue; const d2 = (c.x - hx) ** 2 + (c.y - hy) ** 2; if (d2 < bd) { bd = d2; best = c; } }
-  if (best) { p.held = best; enter(best, 'held', 4); best.sl = false; best.happy = .6; peepAt(best); }
-  else toast('No chick within reach. Walk up close to one.');
+  if (item === 'scoop') {
+    const f = nearIdx(feeders, 22); if (f >= 0) return { id: 'fillFeed', i: f, label: barn.feed[f] > .85 ? 'Top up feeder' : 'Fill feeder' };
+    if (nearRect(sackRect, PR + 18)) return { id: 'stow', label: 'Put scoop back' };
+    return { id: 'none', label: 'Take it to a feeder' };
+  }
+  if (item === 'pail') {
+    const w = nearIdx(waterers, 22); if (w >= 0) return { id: 'fillWater', i: w, label: 'Fresh water' };
+    if (nearRect(pump, PR + 18)) return { id: 'stow', label: 'Put pail down' };
+    return { id: 'none', label: 'Take it to a waterer' };
+  }
+  if (item === 'straw') {
+    if (nearRect(strawBale, PR + 18)) return { id: 'stow', label: 'Put shavings back' };
+    return { id: 'spread', label: 'Spread shavings here' };
+  }
+  if (nearRect(sackRect, PR + 18)) return { id: 'take', item: 'scoop', label: 'Scoop feed' };
+  if (p.y < B.y0 + 56) for (let i = 0; i < windowsX.length; i++) if (Math.abs(p.x - windowsX[i]) < 64) return { id: 'window', i, label: barn.windows[i] ? 'Close window' : 'Open window' };
+  if (nearRect(pump, PR + 18)) return { id: 'take', item: 'pail', label: 'Fill a pail' };
+  if (nearRect(strawBale, PR + 18)) return { id: 'take', item: 'straw', label: 'Grab shavings' };
+  if (nearRect(lampCrate, PR + 18)) return spareLamps() > 0 ? { id: 'take', item: 'lamp', label: 'Take a heat lamp' } : { id: 'none', label: 'No spare lamps' };
+  const d = nearestChickToHands(k => k.s === 'dead');
+  if (d) return { id: 'remove', c: d, label: 'Remove the chick' };
+  const sick = nearestChickToHands(k => k.pasty && k.s !== 'dead');
+  if (sick) return { id: 'pick', c: sick, label: 'Pick up sick chick' };
+  const l = lamps.find(o => Math.hypot(o.x - p.x, o.y - p.y) < 26);
+  if (l) return { id: l.h < 3 ? 'raise' : 'unhang', l, label: l.h < 3 ? 'Raise lamp' : 'Take lamp down', alt: l.h > 1 };
+  const c = nearestChickToHands(k => k.s !== 'dead');
+  if (c) return { id: 'pick', c, label: 'Pick up chick' };
+  return null;
+}
+function pourTo(x, y, col, n) {
+  const p = player, ox = p.x + Math.cos(p.a) * 22, oy = p.y + Math.sin(p.a) * 22;
+  for (let i = 0; i < n; i++) drops.push({ x0: ox, y0: oy, x1: x + rand(-12, 12), y1: y + rand(-12, 12), t: -i * .015, dur: rand(.25, .4), col });
+}
+function doUse() {
+  const u = useCtx, p = player;
+  if (!u) { if (!p.lying) toast('Nothing to use here. Try the feed sacks, the pump or the shavings bale.'); return; }
+  switch (u.id) {
+    case 'none': toast(u.label + '.'); break;
+    case 'drop': {
+      const c = p.held; p.held = null; p.carry = null;
+      c.x = p.x + Math.cos(p.a) * (PR + c.r + 4); c.y = p.y + Math.sin(p.a) * (PR + c.r + 4);
+      c.z = 10; c.vz = 40; c.px = c.x; c.py = c.y; c.sl = false;
+      resolveGround(c, c.r); enter(c, 'idle', rand(.6, 1.5));
+      c.fond = Math.min(1, c.fond + .3); peepAt(c, 'happy');
+      closeNamer();
+      break;
+    }
+    case 'pick': {
+      const c = u.c; p.held = c; p.carry = 'chick';
+      enter(c, 'held', 4); c.sl = false; c.happy = .6; peepAt(c);
+      if (!c.name) toast('Press N to give this one a name.');
+      else toast(`Hello, ${c.name}.`);
+      break;
+    }
+    case 'take':
+      p.carry = u.item;
+      if (u.item === 'pail') pumpSound(); else if (u.item === 'scoop') feedSound(.5); else rustle(.5);
+      break;
+    case 'clean':
+      p.held.pasty = 0; p.held.happy = 1; peepAt(p.held, 'happy', 1.4); waterSound();
+      hearts.push({ x: p.held.x, y: p.held.y - 10, z: 10, vz: 26, life: 1.4, max: 1.4 });
+      toast('Vent cleaned with a warm damp cloth. Soften it first, and never pull.'); break;
+    case 'remove': {
+      const i = chicks.indexOf(u.c); if (i >= 0) chicks.splice(i, 1);
+      toast(CAUSE[u.c.cause] ? CAUSE[u.c.cause][1] : 'You laid the chick to rest.', 6000); saveState(); break;
+    }
+    case 'hang': lamps.push({ x: p.x, y: p.y, h: 1 }); p.carry = null; creak(.5); toast('Hung low on a chain. It warms about 50 chicks. Raise it if they spread away.', 4500); saveState(); break;
+    case 'raise': u.l.h++; creak(.5); toast(`Raised. About ${Math.round(underC(u.l))} °C underneath now.`); break;
+    case 'unhang': lamps.splice(lamps.indexOf(u.l), 1); p.carry = 'lamp'; creak(.5); break;
+    case 'stow': p.carry = null; rustle(.3); break;
+    case 'fillFeed': {
+      const f = feeders[u.i]; barn.feed[u.i] = 1; p.carry = null;
+      pourTo(f.x, f.y, '#c9a06a', 22); feedSound(1); excite = 1;
+      for (const c of chicks) if (isGround(c) && c.s !== 'sleep' && c.s !== 'dead' && Math.hypot(c.x - f.x, c.y - f.y) < 260 && Math.random() < (N.hungry ? .7 : .35)) {
+        const a = rand(TAU), d = f.r + c.r + 4; goTo(c, f.x + Math.cos(a) * d, f.y + Math.sin(a) * d, 'peck', rand(4, 9), rand(40, 60), 4, f.x, f.y);
+      }
+      toast('Feeder filled.');
+      break;
+    }
+    case 'fillWater': {
+      const w = waterers[u.i]; barn.water[u.i] = 1; barn.dirt[u.i] = 0; p.carry = null;
+      pourTo(w.x, w.y, 'rgba(140,200,225,.9)', 18); waterSound();
+      for (const c of chicks) if (isGround(c) && c.s !== 'sleep' && c.s !== 'dead' && Math.hypot(c.x - w.x, c.y - w.y) < 220 && Math.random() < (N.thirsty ? .6 : .25)) goRing(c, [w], null, 'drink', rand(2.5, 5));
+      toast('Fresh water poured.');
+      break;
+    }
+    case 'spread': {
+      const x = p.x + Math.cos(p.a) * 40, y = p.y + Math.sin(p.a) * 40, R = 95;
+      const before = barn.droppings.length;
+      barn.droppings = barn.droppings.filter(d => Math.hypot(d.x - x, d.y - y) > R);
+      barn.fresh.push({ x, y, t: Date.now() }); if (barn.fresh.length > 12) barn.fresh.shift();
+      p.carry = null;
+      for (let i = 0; i < 26; i++) { const a = rand(TAU), d = rand(R); puffs.push({ x: x + Math.cos(a) * d, y: y + Math.sin(a) * d, vx: rand(-30, 30), vy: rand(-30, 30), z: 0, vz: rand(50, 110), rot: rand(TAU), life: 1, col: Math.random() < .5 ? '#fbedbf' : '#ead08a' }); }
+      rustle(1.1);
+      const n = before - barn.droppings.length;
+      toast(n ? `Fresh shavings down. ${n} dropping${n === 1 ? '' : 's'} covered.` : 'Fresh shavings down.');
+      break;
+    }
+    case 'window': {
+      barn.windows[u.i] = !barn.windows[u.i]; creak();
+      toast(barn.windows[u.i] ? (L.day < .4 ? 'Window open. Cold air is coming in.' : 'Window open. Fresh air!') : 'Window closed.');
+      setWind();
+      break;
+    }
+  }
   updateButtons();
 }
 
+function doAlt() {
+  if (!useCtx || !useCtx.alt) return;
+  useCtx.l.h--; creak(.5); toast(`Lowered. About ${Math.round(underC(useCtx.l))} °C underneath now.`); updateButtons();
+}
+
+/* ---------- naming ---------- */
+const namer = document.getElementById('namer'), nameIn = document.getElementById('nameIn');
+function openNamer() {
+  const c = player.held; if (!c) { toast('Pick up a chick first, then name it.'); return; }
+  nameIn.value = c.name || ''; namer.hidden = false; keys.clear();
+  setTimeout(() => nameIn.focus(), 0);
+}
+function closeNamer() { namer.hidden = true; nameIn.blur(); }
+namer.addEventListener('submit', e => {
+  e.preventDefault();
+  const c = player.held, v = nameIn.value.trim().slice(0, 16);
+  if (c && v) {
+    if (!c.name) c.band = chicks.filter(k => k.name).length % BANDS.length;
+    c.name = v; c.happy = 1; peepAt(c, 'happy', 1.4);
+    hearts.push({ x: c.x, y: c.y - 10, z: 10, vz: 26, life: 1.4, max: 1.4 });
+    toast(`${v} has a wing band now.`); saveState(); renderNames();
+  }
+  closeNamer();
+});
+document.getElementById('nameCancel').addEventListener('click', closeNamer);
+
 /* ---------- audio ---------- */
-const audio = { ctx: null, ok: false, out: null, noise: null, recent: 0 };
+const audio = { ctx: null, ok: false, out: null, noise: null, recent: 0, wind: null };
 function initAudio() {
   if (audio.ctx) { audio.ctx.resume && audio.ctx.resume(); return; }
   try {
@@ -1059,8 +1949,17 @@ function initAudio() {
     const alp = a.createBiquadFilter(); alp.type = 'lowpass'; alp.frequency.value = 420;
     const ag = a.createGain(); ag.gain.value = .2;
     src.connect(alp); alp.connect(ag); ag.connect(comp); src.start();
-    audio.ok = true;
+    const ws = a.createBufferSource(); ws.buffer = buf; ws.loop = true;
+    const wf = a.createBiquadFilter(); wf.type = 'bandpass'; wf.frequency.value = 520; wf.Q.value = .6;
+    const wg = a.createGain(); wg.gain.value = 0;
+    ws.connect(wf); wf.connect(wg); wg.connect(comp); ws.start(); audio.wind = wg;
+    audio.ok = true; setWind();
   } catch (e) { audio.ok = false; }
+}
+function setWind() {
+  if (!audio.ok) return;
+  const open = barn.windows.filter(Boolean).length;
+  audio.wind.gain.setTargetAtTime(open * .018, audio.ctx.currentTime, .8);
 }
 function setSound(on) {
   settings.sound = on; saveSettings();
@@ -1073,6 +1972,7 @@ function panner(pan) {
   if (a.createStereoPanner) { const p = a.createStereoPanner(); p.pan.value = pan; return p; }
   return a.createGain();
 }
+const canPlay = () => audio.ok && settings.sound && !document.hidden;
 function playPeep(vol, pan, pitch, kind) {
   const a = audio.ctx, t = a.currentTime + .005, o = a.createOscillator(), g = a.createGain(), pn = panner(pan);
   o.type = 'sine'; const f = 3300 * pitch; let dur;
@@ -1087,6 +1987,12 @@ function playPeep(vol, pan, pitch, kind) {
     g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .015); g.gain.setValueAtTime(vol * .4, t + .075);
     g.gain.exponentialRampToValueAtTime(vol, t + .1); g.gain.exponentialRampToValueAtTime(.0001, t + .18);
     dur = .19;
+  } else if (kind === 'cheep') {
+    o.frequency.setValueAtTime(f * 1.3, t); o.frequency.exponentialRampToValueAtTime(f * .9, t + .12);
+    o.frequency.setValueAtTime(f * 1.3, t + .16); o.frequency.exponentialRampToValueAtTime(f * .9, t + .28);
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol * 1.3, t + .012); g.gain.exponentialRampToValueAtTime(.0001, t + .13);
+    g.gain.setValueAtTime(.0001, t + .155); g.gain.exponentialRampToValueAtTime(vol * 1.3, t + .17); g.gain.exponentialRampToValueAtTime(.0001, t + .29);
+    dur = .3;
   } else {
     o.frequency.setValueAtTime(f * 1.18, t); o.frequency.exponentialRampToValueAtTime(f * .82, t + .09);
     g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .012); g.gain.exponentialRampToValueAtTime(.0001, t + .1);
@@ -1096,8 +2002,8 @@ function playPeep(vol, pan, pitch, kind) {
   o.start(t); o.stop(t + dur + .02);
 }
 function peepAt(c, kind = 'peep', vm = 1) {
-  if (kind !== 'trill') c.peep = .16;
-  if (!audio.ok || !settings.sound || audio.recent > 7) return;
+  if (kind !== 'trill') c.peep = kind === 'cheep' ? .3 : .16;
+  if (!canPlay() || audio.recent > 7) return;
   const d = Math.hypot(c.x - player.x, c.y - player.y);
   const vol = .07 * vm * Math.pow(clamp(1 - d / 520, 0, 1), 1.6);
   if (vol < .002) return;
@@ -1105,7 +2011,7 @@ function peepAt(c, kind = 'peep', vm = 1) {
   playPeep(vol, clamp((c.x - camX) / (W / 2 / Z), -1, 1) * .75, c.pitch, kind);
 }
 function noiseBurst(vol, dur, type, freq, q = .8, pan = 0, at = 0) {
-  if (!audio.ok || !settings.sound) return;
+  if (!canPlay()) return;
   const a = audio.ctx, t = a.currentTime + .005 + at, s = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain(), pn = panner(pan);
   s.buffer = audio.noise; f.type = type; f.frequency.value = freq; f.Q.value = q;
   g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + Math.min(.02, dur * .3)); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
@@ -1115,8 +2021,23 @@ function noiseBurst(vol, dur, type, freq, q = .8, pan = 0, at = 0) {
 const footstep = v => noiseBurst(v, .09, 'bandpass', rand(800, 1300), .7, rand(-.15, .15));
 const rustle = v => { for (let i = 0; i < 6; i++) noiseBurst(.05 * v, rand(.12, .25), 'bandpass', rand(1500, 2600), .6, rand(-.3, .3), i * .06); };
 const tossSound = () => { for (let i = 0; i < 9; i++) noiseBurst(.025, .03, 'highpass', 3500, .5, rand(-.4, .4), .32 + i * .035 + rand(.02)); };
+const feedSound = v => { for (let i = 0; i < 16 * v; i++) noiseBurst(.03, .025, 'highpass', 3000, .5, rand(-.2, .2), i * .03 + rand(.02)); };
+const waterSound = () => { for (let i = 0; i < 6; i++) noiseBurst(.06, .3, 'lowpass', rand(500, 900), 1.2, rand(-.2, .2), i * .12); };
+function pumpSound() {
+  creak(.6, .0); creak(.6, .45);
+  for (let i = 0; i < 5; i++) noiseBurst(.07, .35, 'lowpass', rand(400, 800), 1.4, .2, .3 + i * .15);
+}
+function creak(v = 1, at = 0) {
+  if (!canPlay()) return;
+  const a = audio.ctx, t = a.currentTime + at, o = a.createOscillator(), f = a.createBiquadFilter(), g = a.createGain();
+  o.type = 'sawtooth'; o.frequency.setValueAtTime(140, t); o.frequency.linearRampToValueAtTime(92, t + .35);
+  f.type = 'bandpass'; f.frequency.value = 900; f.Q.value = 6;
+  g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.05 * v, t + .05); g.gain.exponentialRampToValueAtTime(.0001, t + .4);
+  o.connect(f); f.connect(g); g.connect(audio.out); o.start(t); o.stop(t + .45);
+  noiseBurst(.05 * v, .04, 'highpass', 2500, .7, 0, at + .42);
+}
 function purr() {
-  if (!audio.ok || !settings.sound) return;
+  if (!canPlay()) return;
   const a = audio.ctx, t = a.currentTime, s = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain(), lfo = a.createOscillator(), lg = a.createGain();
   s.buffer = audio.noise; s.loop = true; f.type = 'lowpass'; f.frequency.value = 260;
   g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.18, t + .3); g.gain.setValueAtTime(.18, t + 2.2); g.gain.linearRampToValueAtTime(0, t + 2.8);
@@ -1124,12 +2045,22 @@ function purr() {
   s.connect(f); f.connect(g); g.connect(audio.out); s.start(t); s.stop(t + 2.9); lfo.start(t); lfo.stop(t + 2.9);
 }
 function cricket() {
-  if (!audio.ok || !settings.sound) return;
+  if (!canPlay()) return;
   const a = audio.ctx, pan = rand(-.8, .8), f0 = rand(4300, 4900);
   for (let k = 0; k < 3; k++) {
     const t = a.currentTime + k * .07, o = a.createOscillator(), g = a.createGain(), pn = panner(pan);
     o.frequency.value = f0; g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.008, t + .01); g.gain.exponentialRampToValueAtTime(.0001, t + .04);
     o.connect(g); g.connect(pn); pn.connect(audio.out); o.start(t); o.stop(t + .05);
+  }
+}
+function chirp(v = 1) {
+  if (!canPlay()) return;
+  const a = audio.ctx, n = 2 + ((Math.random() * 3) | 0);
+  for (let k = 0; k < n; k++) {
+    const t = a.currentTime + k * .09, o = a.createOscillator(), g = a.createGain();
+    o.frequency.setValueAtTime(5400, t); o.frequency.exponentialRampToValueAtTime(4100, t + .05);
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.025 * v, t + .008); g.gain.exponentialRampToValueAtTime(.0001, t + .06);
+    o.connect(g); g.connect(audio.peepBus); o.start(t); o.stop(t + .07);
   }
 }
 
@@ -1141,17 +2072,22 @@ let camX = player.x, camY = player.y, Z = 1.8, userZoom = 1, lieZoom = 1;
 const toWorld = (sx, sy) => ({ x: (sx - W / 2) / Z + camX, y: (sy - H / 2) / Z + camY });
 
 addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') { if (e.key === 'Escape') closeNamer(); return; }
   if (e.target.closest && e.target.closest('button') && (e.key === ' ' || e.key === 'Enter')) return;
   const k = e.key.toLowerCase();
-  if (!started) { if (k === 'enter' || k === ' ') { e.preventDefault(); startGame(); } return; }
+  if (!$('guide').hidden) { if (k === 'escape') closeGuide(); return; }
+  if (!$('done').hidden) return;
+  if (!document.getElementById('away').hidden) { if (k === 'enter' || k === ' ') { e.preventDefault(); closeAway(); } return; }
+  if (!started) return;
   if ([' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(k)) e.preventDefault();
-  if (e.repeat && [' ', 'f', 'e', 'm'].includes(k)) return;
+  if (e.repeat && [' ', 'f', 'e', 'q', 'm', 'n'].includes(k)) return;
   if (k === ' ') toggleLie();
   else if (k === 'f') scatter();
-  else if (k === 'e') toggleHold();
+  else if (k === 'e') doUse();
+  else if (k === 'q') doAlt();
+  else if (k === 'n') { e.preventDefault(); openNamer(); }
   else if (k === 'm') setSound(!settings.sound);
   else keys.add(k);
-  if (k === 'shift') keys.add('shift');
 });
 addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
 addEventListener('blur', () => keys.clear());
@@ -1159,6 +2095,7 @@ addEventListener('blur', () => keys.clear());
 function findChickAt(x, y, tol) {
   let best = null, bd = Infinity;
   for (const c of chicks) {
+    if (c.s === 'dead') continue;
     const d = Math.hypot(c.x - x, c.y - c.z * .55 - y);
     if (d < c.r + tol && d < bd) { bd = d; best = c; }
   }
@@ -1220,23 +2157,33 @@ cvs.addEventListener('wheel', e => { e.preventDefault(); userZoom = clamp(userZo
 /* ---------- HUD ---------- */
 const $ = id => document.getElementById(id);
 let toastTimer = 0;
-function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2200); }
+function toast(msg, ms = 2400) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), ms); }
+let lastUseLabel = '';
 function updateButtons() {
   const p = player;
   $('bLie').querySelector('span').textContent = p.lying ? 'Get up' : 'Lie down';
   $('bLie').dataset.on = p.lying ? 'true' : 'false';
-  $('bHold').querySelector('span').textContent = p.held ? 'Put down' : 'Pick up';
-  $('bHold').dataset.on = p.held ? 'true' : 'false';
-  $('bHold').disabled = p.lying;
+  $('bName').hidden = p.carry !== 'chick';
+  useCtx = computeUse(); syncUse();
+}
+function syncUse() {
+  const label = useCtx ? useCtx.label : 'Use';
+  const b = $('bUse');
+  if (label !== lastUseLabel) { b.querySelector('span').textContent = label; lastUseLabel = label; }
+  b.disabled = !useCtx || useCtx.id === 'none';
+  b.dataset.on = player.carry && player.carry !== 'chick' ? 'true' : 'false';
+  $('bName').hidden = player.carry !== 'chick';
+  $('bAlt').hidden = !(useCtx && useCtx.alt);
 }
 function bindAct(id, fn) {
-  $(id).addEventListener('click', e => { if (!started) startGame(); fn(); if (e.detail > 0) e.currentTarget.blur(); });
+  $(id).addEventListener('click', e => { if (!started) return; fn(); if (e.detail > 0) e.currentTarget.blur(); });
 }
-bindAct('bLie', toggleLie); bindAct('bFeed', scatter); bindAct('bHold', toggleHold);
+bindAct('bLie', toggleLie); bindAct('bFeed', scatter); bindAct('bUse', doUse); bindAct('bName', openNamer); bindAct('bAlt', doAlt);
 $('bSound').addEventListener('click', e => { setSound(!settings.sound); if (e.detail > 0) e.currentTarget.blur(); });
 $('bSettings').addEventListener('click', e => {
   const pnl = $('panel'); pnl.hidden = !pnl.hidden;
   e.currentTarget.setAttribute('aria-expanded', pnl.hidden ? 'false' : 'true');
+  if (!pnl.hidden) renderNames();
 });
 document.addEventListener('pointerdown', e => {
   const pnl = $('panel');
@@ -1247,32 +2194,129 @@ function syncSeg() {
     const key = seg.dataset.key;
     seg.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(settings[key]) === b.dataset.v ? 'true' : 'false'));
   });
-  $('sCount').textContent = settings.count;
+  $('sCount').textContent = chicks.length || settings.count;
   $('introCount').textContent = { 150: 'A hundred and fifty', 300: 'Three hundred', 500: 'Five hundred' }[settings.count];
 }
 document.querySelectorAll('.seg').forEach(seg => seg.addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
   const key = seg.dataset.key;
-  if (key === 'count') { const n = +b.dataset.v; if (n !== settings.count) { settings.count = n; if (player.lying) standUp(); spawnFlock(n); updateButtons(); } }
+  if (key === 'count') { const n = +b.dataset.v; if (n !== settings.count) { settings.count = n; resizeFlock(n); barn.startCount = aliveCount() + barn.lost; updateButtons(); saveState(); } }
+  else if (key === 'mode') setMode(b.dataset.v);
   else settings.time = b.dataset.v;
   saveSettings(); syncSeg();
 }));
+function renderNames() {
+  const box = $('nameList'); box.textContent = '';
+  const named = chicks.filter(c => c.name);
+  if (!named.length) { const p = document.createElement('div'); p.className = 'none'; p.textContent = 'None named yet. Pick up a chick with E, then press N.'; box.appendChild(p); return; }
+  for (const c of named) {
+    const b = document.createElement('button'); b.type = 'button';
+    const dot = document.createElement('i'); dot.style.background = BANDS[c.band];
+    b.append(dot, document.createTextNode(c.name));
+    b.addEventListener('click', () => { c.hl = 6; toast(`${c.name} is wearing the ${['red', 'blue', 'yellow', 'purple', 'green', 'pink'][c.band]} band.`); });
+    box.appendChild(b);
+  }
+}
+let broodArm = false;
+$('bNewBrood').addEventListener('click', e => {
+  const b = e.currentTarget;
+  if (!broodArm) { broodArm = true; b.textContent = 'Click again to say goodbye'; b.classList.add('warn'); setTimeout(() => { broodArm = false; b.textContent = 'Start a new brood'; b.classList.remove('warn'); }, 4000); return; }
+  broodArm = false; b.textContent = 'Start a new brood'; b.classList.remove('warn');
+  newBrood();
+});
 function startGame() {
   if (started) return;
   started = true; $('intro').hidden = true;
   if (settings.sound) initAudio();
-  cvs.focus && cvs.focus();
 }
-$('bStart').addEventListener('click', startGame);
+function setMode(m) {
+  settings.mode = m; saveSettings();
+  document.body.classList.toggle('cozy', m !== 'care');
+  if (m !== 'care') cozyHold();
+  else if (!barn.startCount) barn.startCount = aliveCount() + barn.lost;
+  $('modeNote').textContent = m === 'care' ? 'You run the brooder. Raise as many as you can to week six.' : 'A farmhand keeps things topped up. Nothing can go wrong.';
+  evalNeeds(); updateButtons(); updateHud();
+}
+for (const [id, m] of [['bCozy', 'cozy'], ['bCare', 'care']]) $(id).addEventListener('click', () => { setMode(m); syncSeg(); startGame(); });
+function newBrood() {
+  if (player.lying) standUp();
+  Object.assign(barn, { broodStart: Date.now(), feed: [1, 1, 1], water: [1, 1, 1, 1], dirt: [0, 0, 0, 0], droppings: [], air: .95, lost: 0, causes: {}, lostNames: [], acc: {}, dryFor: 0, hungryFor: 0, doneShown: false });
+  evalNeeds(); spawnFlock(settings.count); barn.startCount = chicks.length;
+  saveState(); renderNames(); syncSeg(); updateButtons();
+  toast('A new brood of day-old chicks has arrived.');
+}
+function checkDone() {
+  if (!care() || barn.doneShown || !started) return;
+  const alive = aliveCount();
+  if (alive && growth < 1) return;
+  barn.doneShown = true;
+  const total = Math.max(barn.startCount, alive + barn.lost, 1), pct = alive / total * 100, record = alive > 0 && pct > barn.best;
+  if (record) barn.best = pct;
+  $('doneTitle').textContent = alive ? 'They\'re feathered out' : 'The brood was lost';
+  $('doneText').textContent = alive
+    ? `You raised ${alive} of ${total} chicks to week six (${pct.toFixed(1)}%). ${record ? 'That\'s your best brood yet.' : `Your best is ${barn.best.toFixed(1)}%.`}`
+    : 'None of this brood survived. The guide covers what chicks need, and you can start again whenever you like.';
+  const ul = $('doneList'); ul.textContent = '';
+  for (const k in barn.causes) { const li = document.createElement('li'); li.textContent = `${barn.causes[k]} lost ${CAUSE[k] ? CAUSE[k][0] : ''}`; ul.appendChild(li); }
+  $('done').hidden = false; saveState();
+}
+$('bDoneNew').addEventListener('click', () => { $('done').hidden = true; newBrood(); });
+$('bDoneStay').addEventListener('click', () => { $('done').hidden = true; if (!aliveCount()) newBrood(); setMode('cozy'); syncSeg(); });
+function closeGuide() { $('guide').hidden = true; $('bGuide').focus(); }
+$('bGuide').addEventListener('click', () => { keys.clear(); $('guide').hidden = false; $('guideClose').focus(); });
+$('guideClose').addEventListener('click', closeGuide);
+$('guide').addEventListener('click', e => {
+  if (e.target === $('guide')) { closeGuide(); return; }
+  const t = e.target.closest('nav button'); if (!t) return;
+  $('guide').querySelectorAll('nav button').forEach(b => b.setAttribute('aria-selected', b === t ? 'true' : 'false'));
+  $('guide').querySelectorAll('section').forEach(x => { x.hidden = x.dataset.tab !== t.dataset.tab; });
+});
+function closeAway() { $('away').hidden = true; if (!started) startGame(); else if (settings.sound) initAudio(); }
+$('bBack').addEventListener('click', closeAway);
+function fmtDur(sec) {
+  const h = Math.floor(sec / 3600), m = Math.round((sec % 3600) / 60);
+  if (h >= 1) return `${h} h${m ? ' ' + m + ' min' : ''}`;
+  return `${Math.max(1, m)} min`;
+}
+function showAway(sec, before) {
+  const lines = [];
+  const after = { feed: N.feed, water: N.water, bed: N.bed };
+  const died = barn.lost - before.lost;
+  if (died > 0) {
+    const why = Object.keys(barn.causes).filter(k => barn.causes[k] > (before.causes[k] || 0)).map(k => `${barn.causes[k] - (before.causes[k] || 0)} ${CAUSE[k][0]}`);
+    lines.push(`You lost ${died} chick${died === 1 ? '' : 's'}: ${why.join(', ')}.`);
+  }
+  if (care() && after.feed < .2) lines.push('The feeders ran low. Scoop some feed from the sacks by the door.');
+  else if (after.feed < before.feed - .15) lines.push('They ate their way through a good bit of feed.');
+  const totalW = barn.water.reduce((s, v) => s + v, 0);
+  if (care() && totalW < 1) lines.push('The waterers are nearly dry. The pump is on the right-hand wall.');
+  else if (barn.dirt.some(d => d > .6)) lines.push('Some of the water has gone cloudy with shavings.');
+  if (care() && after.bed < before.bed - .1) lines.push(`The bedding got messier (${barn.droppings.length} droppings to cover).`);
+  const open = barn.windows.filter(Boolean).length;
+  if (care() && open && L.day < .4) lines.push(`${open === 1 ? 'A window is' : 'Some windows are'} still open, and it's cold tonight.`);
+  else if (!open && N.hot) lines.push('It got warm and stuffy with every window shut.');
+  const named = chicks.filter(c => c.name);
+  if (named.length) {
+    const c = named[(Math.random() * named.length) | 0];
+    lines.push([`${c.name} is asleep under the warm lamp.`, `${c.name} has been looking for you.`, `${c.name} found a sunny spot by the window.`, `${c.name} got into a scuffle over a crumb and won.`][(Math.random() * 4) | 0]);
+  }
+  if (growth < 1 && broodDays() > 0.95 && sec > 3600 * 4) lines.push(`The chicks are in week ${broodWeek()} now. Their wing feathers are coming in.`);
+  if (!lines.length) lines.push('All quiet. A few naps, a few squabbles at the feeder.');
+  $('awayTitle').textContent = `You were away ${fmtDur(sec)}`;
+  const ul = $('awayList'); ul.textContent = '';
+  for (const l of lines.slice(0, 5)) { const li = document.createElement('li'); li.textContent = l; ul.appendChild(li); }
+  $('away').hidden = false; $('intro').hidden = true;
+}
 
 /* ---------- update ---------- */
 const nearAwake = [], nearSleep = [];
-let lureClock = 0, zClock = 0, statClock = 0, cricketClock = 3, lastStep = 0;
+let lureClock = 0, zClock = 0, statClock = 0, cricketClock = 3, lastStep = 0, saveClock = 10, birdClock = 30;
+let lastWall = Date.now();
 function updatePlayer(dt) {
   const p = player;
   p.tiptoe = keys.has('shift');
   let ix = 0, iy = 0;
-  if (started) {
+  if (started && namer.hidden) {
     if (keys.has('a') || keys.has('arrowleft')) ix -= 1;
     if (keys.has('d') || keys.has('arrowright')) ix += 1;
     if (keys.has('w') || keys.has('arrowup')) iy -= 1;
@@ -1282,6 +2326,7 @@ function updatePlayer(dt) {
   if (p.petTarget) {
     const c = p.petTarget;
     if (!isGround(c)) p.petTarget = null;
+    else if (c.s === 'dead') { p.petTarget = null; p.walkTo = null; }
     else if (Math.hypot(c.x - p.x, c.y - p.y) < 50) { pet(c); p.petTarget = null; p.walkTo = null; }
     else p.walkTo = { x: c.x, y: c.y };
   }
@@ -1294,7 +2339,7 @@ function updatePlayer(dt) {
   const len = Math.hypot(ix, iy); if (len > 1) { ix /= len; iy /= len; }
   const top = p.tiptoe ? 46 : 112;
   p.vx += (ix * top - p.vx) * Math.min(1, dt * 10); p.vy += (iy * top - p.vy) * Math.min(1, dt * 10);
-  if (!p.lying) { p.x += p.vx * dt; p.y += p.vy * dt; if (resolveGround(p, PR)) { /* slide along */ } }
+  if (!p.lying) { p.x += p.vx * dt; p.y += p.vy * dt; resolveGround(p, PR); }
   p.speed = Math.hypot(p.vx, p.vy);
   p.move = clamp(p.speed / 100, 0, 1);
   if (p.speed > 8) p.a = angLerp(p.a, Math.atan2(p.vy, p.vx), Math.min(1, dt * 12));
@@ -1305,14 +2350,22 @@ function updatePlayer(dt) {
   p.lieT = clamp(p.lieT + (p.lying ? 1 : -1) * dt / .45, 0, 1);
   if (p.lying) p.lieTime += dt;
 }
+let lastGrowth = -1;
 function update(dt) {
   time += dt;
-  if (settings.time === 'cycle') dayP = (dayP + dt / CYCLE) % 1;
+  if (settings.time === 'real') dayP = clockP();
+  else if (settings.time === 'cycle') dayP = (dayP + dt / CYCLE) % 1;
   else {
     const target = settings.time === 'day' ? .32 : .78, diff = (target - dayP + 1) % 1;
     if (diff > .002 && diff < .998) dayP = (dayP + Math.min(diff, dt * .12)) % 1;
   }
   updateLight();
+  // needs follow the wall clock, so a backgrounded tab catches up when it returns
+  const now = Date.now(), wsec = clamp((now - lastWall) / 1000, 0, 12 * 3600); lastWall = now;
+  tickNeeds(wsec, wsec < 5);
+  evalNeeds();
+  if (Math.abs(growth - lastGrowth) > .002) { lastGrowth = growth; for (const c of chicks) c.r = chickR(c); }
+
   feedCD = Math.max(0, feedCD - dt); excite = Math.max(0, excite - dt * .8);
   audio.recent = Math.max(0, audio.recent - dt * 30);
   if (cat.purr > 0) cat.purr -= dt;
@@ -1324,7 +2377,7 @@ function update(dt) {
   if (p.lying && p.lieT > .6 && !p.invited) {
     p.invited = true;
     for (const c of chicks) {
-      if (!isGround(c) || c.s === 'snug' || c.s === 'nestle') continue;
+      if (!isGround(c) || c.s === 'snug' || c.s === 'nestle' || c.s === 'dead' || c.pasty) continue;
       if (Math.hypot(c.x - p.x, c.y - p.y) < 300) {
         const asleep = c.s === 'sleep' || c.s === 'nap';
         if (Math.random() < (asleep ? .35 : .6)) { enter(c, 'snug', 14); c.spd = rand(38, 62); c.stuck = 0; c.sl = false; }
@@ -1345,6 +2398,7 @@ function update(dt) {
   for (const c of chicks) {
     updateChick(c, dt);
     const asleep = c.s === 'sleep' || c.s === 'nap' || c.sl;
+    if (c.s === 'dead') continue;
     if (asleep) sleeping++;
     if (c.s === 'snug' || c.s === 'nestle' || c.s === 'climb' || c.s === 'onbody') snug++;
     if (c.s === 'onbody' || c.s === 'climb') on++;
@@ -1357,7 +2411,6 @@ function update(dt) {
   for (const c of chicks) if (c.g) collideChick(c);
   separateOnBody();
 
-  // seeds in flight and on the floor
   for (let i = flying.length - 1; i >= 0; i--) {
     const f = flying[i]; f.t += dt / f.dur;
     if (f.t >= 1) {
@@ -1369,6 +2422,7 @@ function update(dt) {
     }
   }
   for (let i = seeds.length - 1; i >= 0; i--) if (seeds[i].a <= 0) seeds.splice(i, 1);
+  for (let i = drops.length - 1; i >= 0; i--) { const d = drops[i]; d.t += dt / d.dur; if (d.t >= 1) drops.splice(i, 1); }
 
   for (let i = hearts.length - 1; i >= 0; i--) { const h = hearts[i]; h.life -= dt; h.z += h.vz * dt; h.vz *= .97; if (h.life <= 0) hearts.splice(i, 1); }
   for (let i = puffs.length - 1; i >= 0; i--) { const q = puffs[i]; q.life -= dt * 1.4; q.x += q.vx * dt; q.y += q.vy * dt; q.vz -= 300 * dt; q.z = Math.max(0, q.z + q.vz * dt); q.rot += dt * 4; if (q.life <= 0) puffs.splice(i, 1); }
@@ -1379,14 +2433,18 @@ function update(dt) {
     const c = chicks[(Math.random() * chicks.length) | 0];
     if (c && (c.s === 'sleep' || c.sl) && Math.abs(c.x - camX) < W / 2 / Z && Math.abs(c.y - camY) < H / 2 / Z) zzz.push({ x: c.x + 4, y: c.y - c.z * .55 - 7, life: 1 });
   }
+  // breeze from open windows
+  barn.windows.forEach((o, i) => { if (o && Math.random() < dt * .8) puffs.push({ x: windowsX[i] + rand(-40, 40), y: B.y0 + 4, vx: rand(-20, 20), vy: rand(30, 60), z: 20, vz: 10, rot: rand(TAU), life: 1.4, col: '#ecc977' }); });
+  birdClock -= dt;
+  if (birdClock < 0) { birdClock = rand(40, 120); if (barn.windows.some(Boolean) && L.day > .3 && Math.random() < .6) sparrowIn(); }
+  updateBird(dt);
 
-  // chatter
-  const rate = Math.min(9, .6 + nearAwake.length * .045 + excite * 6);
-  if (nearAwake.length && Math.random() < rate * dt) peepAt(nearAwake[(Math.random() * nearAwake.length) | 0]);
+  const unhappy = 1 - N.mood;
+  const rate = Math.min(10, .6 + nearAwake.length * .045 + excite * 6 + unhappy * 5);
+  if (nearAwake.length && Math.random() < rate * dt) peepAt(nearAwake[(Math.random() * nearAwake.length) | 0], N.mood < .5 && Math.random() < unhappy ? 'cheep' : 'peep');
   if (nearSleep.length && Math.random() < Math.min(1.5, .2 + nearSleep.length * .025) * dt) peepAt(nearSleep[(Math.random() * nearSleep.length) | 0], 'trill', .7);
   if (L.day < .3) { cricketClock -= dt; if (cricketClock < 0) { cricketClock = rand(1.5, 5); cricket(); } }
 
-  // camera
   lieZoom = lerp(lieZoom, p.lying ? 1.18 : 1, Math.min(1, dt * 2));
   Z = clamp(Math.min(W, H * 1.45) / 720, 1.05, 2.4) * userZoom * lieZoom;
   const tx = p.lying ? p.x - C.dx * 16 : p.x, ty = p.lying ? p.y - C.dy * 16 : p.y;
@@ -1396,12 +2454,31 @@ function update(dt) {
   camX = vw >= WW ? WW / 2 : clamp(camX, vw / 2, WW - vw / 2);
   camY = vh >= WH ? WH / 2 : clamp(camY, vh / 2, WH - vh / 2);
 
+  useCtx = computeUse(); syncUse();
+
   statClock -= dt;
-  if (statClock < 0) {
-    statClock = .4;
-    $('sSleep').textContent = stats.sleeping; $('sSnug').textContent = stats.snug; $('sOn').textContent = stats.on;
-    $('sTime').textContent = timeName(dayP);
-  }
+  if (statClock < 0) { statClock = .5; updateHud(); }
+  saveClock -= dt;
+  if (saveClock < 0) { saveClock = 15; saveState(); }
+}
+const meterCol = v => v > .6 ? '#5c7a66' : v > .3 ? '#c99a2e' : '#a8392a';
+function setMeter(id, v) { const b = $(id); b.style.width = Math.round(clamp(v, .03, 1) * 100) + '%'; b.style.backgroundColor = meterCol(v); }
+function updateHud() {
+  $('sSleep').textContent = stats.sleeping; $('sSnug').textContent = stats.snug; $('sOn').textContent = stats.on;
+  $('sCount').textContent = aliveCount() + (care() && barn.startCount ? ` / ${Math.max(barn.startCount, aliveCount() + barn.lost)}` : ''); $('sLost').textContent = barn.lost;
+  checkDone();
+  $('sTime').textContent = timeName(dayP) + (settings.time === 'real' ? '' : ' · barn time');
+  $('sAge').textContent = (growth >= 1 ? 'Feathered out' : `Week ${broodWeek()}`) + ` · aim for ${targetC()} °C`;
+  setMeter('mFeed', N.feed); setMeter('mWater', N.water); setMeter('mBed', N.bed); setMeter('mAir', N.air);
+  const w = $('sWarm'); w.textContent = N.cold && lamps.length * LAMP_CHICKS < aliveCount() ? 'Too few lamps' : (N.cold ? 'Chilly' : N.hot ? 'Too warm' : 'Cozy') + (care() ? ` ${Math.round(N.lampC)}°` : ''); w.style.color = N.cold ? '#2f5f8a' : N.hot ? '#a8392a' : '#3f5848';
+  const m = N.mood;
+  $('sMood').textContent = m > .85 ? 'Blissful' : m > .65 ? 'Content' : m > .4 ? 'Fussing' : 'Unhappy';
+  $('moodDot').style.background = meterCol(m);
+  const issue = topIssue();
+  $('sTip').textContent = issue ? issue[1] : (stats.on > 10 ? 'You are mostly chick now.' : 'All\'s well in the barn.');
+  const title = issue && N.mood < .7 ? `Peep Break · ${issue[2]}` : 'Peep Break';
+  if (document.title !== title) document.title = title;
+  $('broodNote').textContent = growth >= 1 ? 'This brood is fully feathered and ready for the coop.' : `Chicks grow for six days, then they're ready for the coop. Day ${Math.floor(broodDays()) + 1} of 6.`;
 }
 
 /* ---------- render ---------- */
@@ -1410,7 +2487,6 @@ function localT(x, y, a, s = 1) {
   const k = Z * DPR * s, c = Math.cos(a) * k, sn = Math.sin(a) * k;
   ctx.setTransform(c, sn, -sn, c, ((x - camX) * Z + W / 2) * DPR, ((y - camY) * Z + H / 2) * DPR);
 }
-const toScreen = (x, y) => [((x - camX) * Z + W / 2) * DPR, ((y - camY) * Z + H / 2) * DPR];
 
 const SKY = {
   dT: hex('#8fc6e4'), dB: hex('#e4f1ee'), gT: hex('#e98f5a'), gB: hex('#f7cf8e'), nT: hex('#0f1634'), nB: hex('#253058'),
@@ -1420,7 +2496,7 @@ const stars = windowsX.map(() => Array.from({ length: 7 }, () => [rand(-48, 48),
 function drawWindows() {
   const n = 1 - L.day;
   windowsX.forEach((wx, i) => {
-    const x0 = wx - 52, y0 = 44, w = 104, h = 76;
+    const x0 = wx - 52, y0 = 44, w = 104, h = 76, open = barn.windows[i];
     const top = mix(mix(SKY.nT, SKY.dT, L.day), SKY.gT, L.gold * .8), bot = mix(mix(SKY.nB, SKY.dB, L.day), SKY.gB, L.gold * .8);
     const gr = ctx.createLinearGradient(0, y0, 0, y0 + h); gr.addColorStop(0, rgb(top)); gr.addColorStop(1, rgb(bot));
     ctx.fillStyle = gr; ctx.fillRect(x0, y0, w, h);
@@ -1431,29 +2507,41 @@ function drawWindows() {
     ctx.quadraticCurveTo(x0 + w * (.3 + i * .12), y0 + h - 34 + i * 3, x0 + w, y0 + h - 18 - (i % 3) * 4); ctx.lineTo(x0 + w, y0 + h); ctx.fill();
     ctx.strokeStyle = rgb(mix(hex('#141c26'), hex('#5a4630'), L.day)); ctx.lineWidth = 1.2;
     ctx.beginPath(); for (let fx = x0 + 6; fx < x0 + w; fx += 14) { ctx.moveTo(fx, y0 + h - 6); ctx.lineTo(fx, y0 + h - 14); } ctx.moveTo(x0, y0 + h - 11); ctx.lineTo(x0 + w, y0 + h - 11); ctx.stroke();
+    // glass: closed windows get a tint and a glare streak over every pane; an open sash leaves the bottom half clear
+    ctx.fillStyle = `rgba(210,228,235,${.1 + .05 * L.day})`;
+    ctx.fillRect(x0, y0, w, open ? h / 2 : h);
     ctx.fillStyle = `rgba(255,255,255,${.1 * L.day + .03})`;
-    ctx.beginPath(); ctx.moveTo(x0 + 10, y0 + h); ctx.lineTo(x0 + 36, y0); ctx.lineTo(x0 + 48, y0); ctx.lineTo(x0 + 22, y0 + h); ctx.fill();
-    ctx.fillStyle = '#5a3a22'; ctx.fillRect(wx - 2.5, y0, 5, h); ctx.fillRect(x0, y0 + h / 2 - 2.5, w, 5);
+    ctx.beginPath(); ctx.moveTo(x0 + 10, y0 + (open ? h / 2 : h)); ctx.lineTo(x0 + (open ? 23 : 36), y0); ctx.lineTo(x0 + (open ? 35 : 48), y0); ctx.lineTo(x0 + 22, y0 + (open ? h / 2 : h)); ctx.fill();
+    ctx.fillStyle = '#5a3a22'; ctx.fillRect(wx - 2.5, y0, 5, open ? h / 2 : h); ctx.fillRect(x0, y0 + h / 2 - 2.5, w, 5);
+    if (open) { ctx.fillStyle = '#6a4629'; ctx.fillRect(x0, y0 + 2, w, 5); ctx.fillRect(x0, y0 + h / 2 - 7, w, 6); ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.fillRect(x0, y0 + h / 2 + 3, w, 2); }
     ctx.strokeStyle = '#4b2f1b'; ctx.lineWidth = 6; ctx.strokeRect(x0 - 3, y0 - 3, w + 6, h + 6);
     ctx.fillStyle = '#8a6040'; ctx.fillRect(x0 - 10, y0 + h + 3, w + 20, 7);
     ctx.fillStyle = 'rgba(255,225,180,.2)'; ctx.fillRect(x0 - 10, y0 + h + 3, w + 20, 1.5);
   });
 }
+function drawChalkboard() {
+  ctx.fillStyle = '#2f3a34'; ctx.fillRect(930, 46, 106, 68);
+  ctx.fillStyle = 'rgba(255,255,255,.05)'; ell(ctx, 960, 70, 18, 5); ell(ctx, 1010, 98, 14, 4);
+  ctx.fillStyle = 'rgba(240,238,226,.88)'; ctx.font = '600 15px Caveat, "Comic Sans MS", cursive'; ctx.textAlign = 'left';
+  ctx.fillText(growth >= 1 ? 'Ready for coop!' : `Week ${broodWeek()} chicks`, 938, 64);
+  ctx.fillText(`aim for ${targetC()}°C`, 938, 82);
+  const named = chicks.filter(c => c.name).length;
+  ctx.fillText(named ? `${named} named` : 'name them?', 938, 100);
+  ctx.fillStyle = '#e8e4d8'; ctx.fillRect(990, 113, 14, 3);
+}
 function drawSun() {
   const a = L.day * (1 - L.gold * .25); if (a < .02) return;
   const col = mix(hex('#ffeab2'), hex('#ffb870'), L.gold);
   ctx.save(); ctx.beginPath(); ctx.rect(B.x0 - 2, 40, B.x1 - B.x0 + 4, WH - 66); ctx.clip();
-  ctx.globalCompositeOperation = 'screen';
-  for (const wx of windowsX) {
-    const sp = sunPatch(wx);
+  ctx.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < windowsX.length; i++) {
+    const wx = windowsX[i], sp = sunPatch(wx), boost = barn.windows[i] ? 1.25 : 1;
     const gr = ctx.createLinearGradient(0, 120, 0, sp.y + 30);
-    gr.addColorStop(0, rgb(col, .2 * a)); gr.addColorStop(1, rgb(col, .035 * a));
+    gr.addColorStop(0, rgb(col, .1 * a * boost)); gr.addColorStop(1, rgb(col, .02 * a * boost));
     ctx.fillStyle = gr; ctx.beginPath();
     ctx.moveTo(wx - 50, 120); ctx.lineTo(wx + 50, 120); ctx.lineTo(sp.x + 54 + sp.sh * 30, sp.y + 30); ctx.lineTo(sp.x - 54 + sp.sh * 30, sp.y + 30); ctx.closePath(); ctx.fill();
   }
-  ctx.restore();
-  ctx.save(); ctx.beginPath(); ctx.rect(B.x0 - 2, WALL, B.x1 - B.x0 + 4, B.y1 - WALL); ctx.clip();
-  ctx.globalCompositeOperation = 'screen'; ctx.globalAlpha = .5 * a;
+  ctx.globalAlpha = .28 * a;
   for (const wx of windowsX) {
     const sp = sunPatch(wx), k = Z * DPR;
     ctx.setTransform(k, 0, sp.sh * k, k, ((sp.x - camX) * Z + W / 2) * DPR, ((sp.y - camY) * Z + H / 2) * DPR);
@@ -1463,29 +2551,70 @@ function drawSun() {
 }
 function drawDoorLight() {
   const a = L.day; if (a < .05) return;
-  ctx.save(); ctx.globalCompositeOperation = 'screen';
-  ctx.fillStyle = `rgba(255,236,190,${.55 * a})`; ctx.fillRect(552, 169, 196, 3); ctx.fillRect(649, 30, 2, 140);
-  const gr = ctx.createLinearGradient(0, 172, 0, 215); gr.addColorStop(0, `rgba(255,230,170,${.22 * a})`); gr.addColorStop(1, 'rgba(255,230,170,0)');
+  ctx.fillStyle = `rgba(255,236,190,${.4 * a})`; ctx.fillRect(552, 169, 196, 3); ctx.fillRect(649, 30, 2, 140);
+  const gr = ctx.createLinearGradient(0, 172, 0, 215); gr.addColorStop(0, `rgba(255,230,170,${.15 * a})`); gr.addColorStop(1, 'rgba(255,230,170,0)');
   ctx.fillStyle = gr; ctx.beginPath(); ctx.moveTo(552, 172); ctx.lineTo(748, 172); ctx.lineTo(770, 215); ctx.lineTo(530, 215); ctx.fill();
-  ctx.restore();
 }
 function drawLampGlow() {
   const n = 1 - L.day;
-  ctx.save(); ctx.globalCompositeOperation = 'screen';
-  for (const l of lamps) {
-    const gr = ctx.createRadialGradient(l.x, l.y, 0, l.x, l.y, 165);
-    gr.addColorStop(0, `rgba(255,128,60,${.3 + .12 * n})`); gr.addColorStop(.5, `rgba(255,110,45,${.12 + .08 * n})`); gr.addColorStop(1, 'rgba(255,90,30,0)');
-    ctx.fillStyle = gr; ctx.fillRect(l.x - 165, l.y - 165, 330, 330);
-  }
-  ctx.restore();
+  ctx.globalCompositeOperation = 'lighter';
+  for (const l of lamps) { const R = 130 + l.h * 22; ctx.globalAlpha = (.17 + .08 * n) * (1.25 - l.h * .15); ctx.drawImage(glowSpr, l.x - R, l.y - R, R * 2, R * 2); }
+  ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
 }
-function drawSeeds() {
-  ctx.fillStyle = '#8a5a2a'; ctx.beginPath();
-  for (const s of seeds) { ctx.moveTo(s.x + 1.3, s.y); ctx.ellipse(s.x, s.y, 1.3, .85, s.rot, 0, TAU); }
+function drawFresh() {
+  const now = Date.now();
+  for (const f of barn.fresh) {
+    const age = (now - f.t) / (6 * 3600e3); if (age >= 1) continue;
+    ctx.globalAlpha = .85 * (1 - age);
+    ctx.drawImage(freshSpr, f.x - 100, f.y - 100, 200, 200);
+  }
+  ctx.globalAlpha = 1;
+}
+function drawDroppings(x0, y0, x1, y1) {
+  ctx.fillStyle = '#5b4a2a'; ctx.beginPath();
+  for (const d of barn.droppings) { if (d.x < x0 || d.x > x1 || d.y < y0 || d.y > y1) continue; ctx.moveTo(d.x + 2.2, d.y); ctx.ellipse(d.x, d.y, 2.2, 1.6, d.rot, 0, TAU); }
   ctx.fill();
-  ctx.fillStyle = '#d8b47a'; ctx.beginPath();
-  for (const s of seeds) { const x = s.x + Math.cos(s.rot) * 1.6, y = s.y + Math.sin(s.rot) * 1.6; ctx.moveTo(x + .8, y); ctx.arc(x, y, .8, 0, TAU); }
+  ctx.fillStyle = 'rgba(240,236,220,.9)'; ctx.beginPath();
+  for (const d of barn.droppings) { if (d.x < x0 || d.x > x1 || d.y < y0 || d.y > y1) continue; const x = d.x + Math.cos(d.rot) * .8, y = d.y + Math.sin(d.rot) * .8; ctx.moveTo(x + .9, y); ctx.arc(x, y, .9, 0, TAU); }
   ctx.fill();
+}
+function drawFeeder(f, lvl) {
+  const { x, y, r } = f;
+  ctx.fillStyle = '#b23d2b'; circ(ctx, x, y, r + 4);
+  ctx.fillStyle = '#6e2519'; circ(ctx, x, y, r);
+  if (lvl > .01) {
+    ctx.globalAlpha = clamp(lvl * 2.2, 0, 1);
+    ctx.fillStyle = '#c7a068'; circ(ctx, x, y, r);
+    ctx.fillStyle = '#9a7442';
+    for (let i = 0; i < 18; i++) { const a = i * 2.4, d = r * (.62 + (i % 5) * .07); circ(ctx, x + Math.cos(a) * d, y + Math.sin(a) * d, .9); }
+    ctx.globalAlpha = 1;
+  }
+  ctx.strokeStyle = '#9c3324'; ctx.lineWidth = 2.2; ctx.beginPath();
+  for (let i = 0; i < 10; i++) { const a = i / 10 * TAU; ctx.moveTo(x + Math.cos(a) * r * .6, y + Math.sin(a) * r * .6); ctx.lineTo(x + Math.cos(a) * (r + 3), y + Math.sin(a) * (r + 3)); }
+  ctx.stroke();
+  ctx.strokeStyle = '#d4604a'; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.arc(x, y, r + 3.2, Math.PI * 1.05, Math.PI * 1.7); ctx.stroke();
+  ctx.fillStyle = '#d9d5cc'; circ(ctx, x, y, r * .58);
+  if (lvl > .01) { ctx.fillStyle = 'rgba(190,150,95,.85)'; circ(ctx, x, y, r * .5 * Math.sqrt(lvl)); }
+  ctx.fillStyle = 'rgba(255,255,255,.35)'; ell(ctx, x - 4, y - 4, 4, 2.6, -.6);
+  ctx.strokeStyle = '#7f7a72'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(x, y, r * .58, 0, TAU); ctx.stroke();
+  ctx.strokeStyle = '#5e5a55'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.arc(x, y - 1, 4, Math.PI, 0); ctx.stroke();
+}
+function drawWaterer(w, lvl, dirt) {
+  const { x, y, r } = w;
+  ctx.fillStyle = '#9aa4a8'; circ(ctx, x, y, r + 3);
+  ctx.fillStyle = '#7d878b'; circ(ctx, x, y, r);
+  if (lvl > .01) {
+    ctx.globalAlpha = clamp(lvl * 2.5, 0, 1);
+    ctx.fillStyle = rgb(mix(hex('#5e9cb2'), hex('#8a7a4e'), dirt)); circ(ctx, x, y, r);
+    ctx.strokeStyle = `rgba(190,230,240,${.55 * (1 - dirt)})`; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.arc(x, y, r - 2.5, Math.PI * 1.1, Math.PI * 1.6); ctx.stroke();
+    if (dirt > .35) { ctx.fillStyle = 'rgba(220,190,120,.8)'; for (let i = 0; i < Math.round(dirt * 10); i++) { const a = i * 2.1 + time * .1, d = r * .8; ctx.fillRect(x + Math.cos(a) * d, y + Math.sin(a) * d, 1.6, .8); } }
+    ctx.globalAlpha = 1;
+  }
+  const gr = ctx.createRadialGradient(x - 3, y - 4, 1, x, y, r * .62);
+  gr.addColorStop(0, '#f3f5f3'); gr.addColorStop(1, '#8d989c');
+  ctx.fillStyle = gr; circ(ctx, x, y, r * .62);
+  ctx.fillStyle = '#6c7579'; circ(ctx, x, y, 2.2);
+  ctx.strokeStyle = '#c9d0d2'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(x, y, r + 2.5, Math.PI * 1.1, Math.PI * 1.7); ctx.stroke();
 }
 function drawCat() {
   const b = 1 + Math.sin(time * 1.6) * .025, pr = cat.purr > 0;
@@ -1517,7 +2646,10 @@ function drawChick(c) {
   const a = c.a + (c.happy > 0 ? Math.sin(c.anim * 26) * .22 * c.happy : 0);
   let hx = r * .8, hy = 0, hs = 1, bx = 1, by = 1, eyes = true, wing = 0;
   const asleep = s === 'sleep' || s === 'nap' || c.sl;
-  if (asleep) {
+  const dead = s === 'dead', pant = N.hot && !asleep && !dead && c.mv < 10;
+  if (dead) { eyes = false; bx = 1.1; by = .85; hx = r * .9; hy = r * .3; }
+  else if (c.pasty && !asleep) { hx = r * .55; bx = .9; by = 1.1; }
+  else if (asleep) {
     eyes = false;
     if (s === 'nap') { hx = r * 1.02; hs = .86; }
     else { hx = r * .5; hs = .9; const br = 1 + Math.sin(c.anim * 2.6 + c.ph) * .035; bx = br * 1.04; by = br * 1.06; }
@@ -1528,25 +2660,34 @@ function drawChick(c) {
     if (cyc < .25) { const kk = Math.sin(cyc / .25 * Math.PI); hx += kk * r * .3; hs = 1 - kk * .2; } else if (cyc < .75) { hx = r * .55; hs = 1.1; }
   } else if (s === 'sun') { bx = .92; by = 1.28; wing = 2; eyes = false; hx = r * .72; }
   else if (s === 'idle' || s === 'onbody' || s === 'held' || s === 'nestle') hy = Math.sin(c.anim * 1.4 + c.ph) * r * .22;
-  if (s === 'flee' || s === 'zoom' || c.z > 3 && s !== 'onbody' && s !== 'held') wing = wing || 1;
-  localT(x, y, a, sc);
-  if (wing) {
-    ctx.fillStyle = v.wing;
-    for (const sd of wing === 2 ? [1] : [-1, 1]) ell(ctx, -r * .05, sd * r * (wing === 2 ? 1.05 : .92), r * (wing === 2 ? .75 : .55), r * .3, sd * (wing === 2 ? .35 : .5));
+  if (s === 'flee' || s === 'zoom' || pant || c.z > 3 && s !== 'onbody' && s !== 'held') wing = wing || 1;
+  if (c.hl > 0) {
+    worldT(); ctx.strokeStyle = BANDS[c.band]; ctx.lineWidth = 1.6; ctx.globalAlpha = .5 + .5 * Math.sin(time * 8);
+    ctx.beginPath(); ctx.arc(x, y, r * 2 + Math.sin(time * 4) * 2, 0, TAU); ctx.stroke(); ctx.globalAlpha = 1;
   }
+  localT(x, y, a, sc);
+  const wc = wingCol[c.v][Math.round(growth * 5)], wl = .5 + .35 * growth;
+  if (wing) {
+    ctx.fillStyle = wc;
+    for (const sd of wing === 2 ? [1] : [-1, 1]) ell(ctx, -r * .05, sd * r * (wing === 2 ? 1.05 : .92), r * (wing === 2 ? .75 : wl + .05), r * .3, sd * (wing === 2 ? .35 : .5));
+  }
+  if (growth > .35) { ctx.fillStyle = wc; ctx.beginPath(); ctx.moveTo(-r * .8, -r * .3); ctx.lineTo(-r * (1.05 + .35 * growth), 0); ctx.lineTo(-r * .8, r * .3); ctx.fill(); }
   const k = r / 20;
   ctx.drawImage(bodySpr[c.v], -32 * k * bx, -32 * k * by, 64 * k * bx, 64 * k * by);
   if (!wing) {
-    ctx.fillStyle = v.wing; ctx.globalAlpha = .75;
-    for (const sd of [-1, 1]) ell(ctx, -r * .12, sd * r * .74 * by, r * .5, r * .2, sd * .12);
+    ctx.fillStyle = wc; ctx.globalAlpha = .75 + .2 * growth;
+    for (const sd of [-1, 1]) ell(ctx, -r * (.12 + .15 * growth), sd * r * .74 * by, r * wl, r * (.2 + .06 * growth), sd * .12);
     ctx.globalAlpha = 1;
   }
+  if (c.pasty) { ctx.fillStyle = '#6b4a2a'; ell(ctx, -r * 1.05, 0, r * .26, r * .3); }
+  if (dead) { ctx.strokeStyle = '#d98f3a'; ctx.lineWidth = r * .12; ctx.beginPath(); ctx.moveTo(-r * .4, r * .6); ctx.lineTo(-r * .7, r * 1.15); ctx.moveTo(-r * .1, r * .6); ctx.lineTo(-r * .3, r * 1.2); ctx.stroke(); }
+  if (c.name) { ctx.fillStyle = BANDS[c.band]; ell(ctx, -r * .05, r * .78 * by, r * .2, r * .13); }
   const hr = r * .62 * hs, hk = hr / 11;
   ctx.drawImage(headSpr[c.v], hx - 16 * hk, hy - 16 * hk, 32 * hk, 32 * hk);
   ctx.fillStyle = '#e8983a';
   const bp = hx + hr * .78;
   ctx.beginPath();
-  if (c.peep > 0 && !asleep) {
+  if ((c.peep > 0 || pant) && !asleep) {
     ctx.moveTo(bp, hy - hr * .34); ctx.lineTo(bp + hr * .6, hy - hr * .24); ctx.lineTo(bp, hy - hr * .04);
     ctx.moveTo(bp, hy + hr * .34); ctx.lineTo(bp + hr * .6, hy + hr * .24); ctx.lineTo(bp, hy + hr * .04);
   } else { ctx.moveTo(bp, hy - hr * .3); ctx.lineTo(bp + hr * .62, hy); ctx.lineTo(bp, hy + hr * .3); }
@@ -1564,75 +2705,70 @@ function drawChick(c) {
     ctx.moveTo(ex - hr * .18, hy - ey); ctx.lineTo(ex + hr * .14, hy - ey); ctx.moveTo(ex - hr * .18, hy + ey); ctx.lineTo(ex + hr * .14, hy + ey); ctx.stroke();
   }
 }
-const COL = { sw: '#5c7a66', swD: '#46604f', swL: '#6f8f79', bean: '#b5533a', beanD: '#8f3f2b', pom: '#f1e4c8', scarf: '#e0a83c', scarfD: '#b9862a', skin: '#f1c9a5', jean: '#4d6584', jeanD: '#3c506a', boot: '#4a3222', hair: '#6b4630' };
+function drawCarry(item) {
+  // drawn in the player's local frame, in front of the chest
+  if (item === 'scoop') {
+    ctx.fillStyle = '#8d969a'; rr(ctx, 15, -7, 15, 14, 4); ctx.fill();
+    ctx.fillStyle = '#c7a068'; rr(ctx, 17, -5, 11, 10, 3); ctx.fill();
+    ctx.fillStyle = '#9a7442'; for (let i = 0; i < 6; i++) circ(ctx, 19 + (i % 3) * 3.5, -2.5 + (i >> 1) * 2, .8);
+    ctx.fillStyle = '#5d4a3a'; rr(ctx, 9, -1.5, 7, 3, 1.5); ctx.fill();
+  } else if (item === 'pail') {
+    ctx.fillStyle = '#9ea7aa'; circ(ctx, 24, 0, 9.5);
+    ctx.fillStyle = '#6fa8bd'; circ(ctx, 24, 0, 7.5);
+    ctx.strokeStyle = 'rgba(210,240,250,.6)'; ctx.lineWidth = .8; ctx.beginPath(); ctx.arc(24, 0, 5.5, 3.6, 4.6); ctx.stroke();
+    ctx.strokeStyle = '#d6dcdd'; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.arc(24, 0, 9, 0, TAU); ctx.stroke();
+    ctx.strokeStyle = '#5f6669'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(15, 0); ctx.quadraticCurveTo(17, -10, 24, -9.5); ctx.stroke();
+  } else if (item === 'lamp') {
+    ctx.fillStyle = '#8f8a83'; circ(ctx, 24, 0, 10); ctx.fillStyle = '#d3cec5'; circ(ctx, 22.5, -1.5, 6); ctx.fillStyle = '#c8321a'; circ(ctx, 24, 0, 3.4);
+  } else if (item === 'straw') {
+    ctx.strokeStyle = '#e2c26c'; ctx.lineWidth = 1.1; ctx.lineCap = 'round'; ctx.beginPath();
+    for (let i = 0; i < 40; i++) { const y = -10 + (i * 7.3 % 20), x = 14 + (i * 3.1 % 6); ctx.moveTo(x, y); ctx.lineTo(x + 12 + (i % 4), y + ((i % 5) - 2) * .8); }
+    ctx.stroke();
+    ctx.strokeStyle = '#f4dfa0'; ctx.beginPath(); for (let i = 0; i < 16; i++) { const y = -9 + i * 1.2; ctx.moveTo(16, y); ctx.lineTo(27, y + (i % 3 - 1)); } ctx.stroke();
+  }
+}
 function drawPlayerStanding(p, crouch) {
-  localT(p.x, p.y, p.a, 1 - crouch * .25);
+  const s = 1 - crouch * .25;
+  localT(p.x, p.y, p.a, s);
   ctx.fillStyle = 'rgba(50,28,8,.28)'; ell(ctx, 2, 3, 17, 23);
   const st = Math.sin(p.walk) * p.move;
-  ctx.fillStyle = COL.boot; ell(ctx, 5 + st * 9, -8, 7, 4.5); ell(ctx, 5 - st * 9, 8, 7, 4.5);
-  const held = !!p.held;
-  const hl = held ? [16, -7.5] : [3 - st * 8, -21], hrp = held ? [16, 7.5] : [3 + st * 8, 21];
-  ctx.strokeStyle = COL.swD; ctx.lineWidth = 7; ctx.lineCap = 'round';
-  ctx.beginPath(); ctx.moveTo(0, -15); ctx.lineTo(hl[0], hl[1]); ctx.moveTo(0, 15); ctx.lineTo(hrp[0], hrp[1]); ctx.stroke();
-  if (!held) { ctx.fillStyle = COL.skin; circ(ctx, hl[0], hl[1], 3.6); circ(ctx, hrp[0], hrp[1], 3.6); }
-  const gr = ctx.createRadialGradient(2, -4, 2, 0, 0, 20); gr.addColorStop(0, COL.swL); gr.addColorStop(1, COL.sw);
-  ctx.fillStyle = gr; ell(ctx, 0, 0, 11.5, 19.5);
-  ctx.strokeStyle = 'rgba(30,45,35,.18)'; ctx.lineWidth = .8; ctx.beginPath();
-  for (let i = -14; i <= 14; i += 3.5) { ctx.moveTo(-8, i); ctx.quadraticCurveTo(-6, i + 1.5, -4, i); }
-  ctx.stroke();
-  ctx.strokeStyle = COL.scarf; ctx.lineWidth = 4.5; ctx.beginPath(); ctx.ellipse(1.5, 0, 8, 10.5, 0, 0, TAU); ctx.stroke();
-  ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(-4, 7); ctx.quadraticCurveTo(-12, 10, -18, 8 + st * 2); ctx.stroke();
-  ctx.strokeStyle = COL.scarfD; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-18, 6); ctx.lineTo(-21, 6 + st * 2); ctx.moveTo(-18, 10); ctx.lineTo(-21, 10 + st * 2); ctx.stroke();
-  ctx.fillStyle = COL.skin; ell(ctx, 9.6, 0, 3, 5);
-  ctx.fillStyle = COL.bean; circ(ctx, 2, 0, 9.6);
-  ctx.strokeStyle = COL.beanD; ctx.lineWidth = 2.4; ctx.beginPath(); ctx.arc(2, 0, 8.4, -1.25, 1.25); ctx.stroke();
-  ctx.lineWidth = .8; ctx.beginPath(); for (let t = -1.1; t <= 1.1; t += .28) { ctx.moveTo(2 + Math.cos(t) * 7, Math.sin(t) * 7); ctx.lineTo(2 + Math.cos(t) * 9.4, Math.sin(t) * 9.4); } ctx.stroke();
-  ctx.fillStyle = COL.pom; circ(ctx, -1, 0, 4.3);
-  ctx.fillStyle = 'rgba(180,160,130,.5)'; circ(ctx, -2, 1, 1.2); circ(ctx, 0, -1.5, .9);
+  for (const [bx, by] of [[5 + st * 9, -8], [5 - st * 9, 8]]) {
+    ctx.fillStyle = COL.bootD; ell(ctx, bx, by, 7.4, 4.9);
+    ctx.fillStyle = COL.boot; ell(ctx, bx + .4, by - .3, 6.4, 4);
+    ctx.fillStyle = 'rgba(255,230,200,.18)'; ell(ctx, bx + 2.5, by - 1.2, 2.2, 1.4);
+  }
+  const busy = !!p.carry;
+  const hl = busy ? [16, -7.5] : [3 - st * 8, -21], hrp = busy ? [16, 7.5] : [3 + st * 8, 21];
+  for (const [sx, sy, h] of [[0, -15, hl], [0, 15, hrp]]) {
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = COL.swD; ctx.lineWidth = 7.6; ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(h[0], h[1]); ctx.stroke();
+    ctx.strokeStyle = COL.sw; ctx.lineWidth = 5.4; ctx.beginPath(); ctx.moveTo(sx - .5, sy - .6); ctx.lineTo(h[0] - .5, h[1] - .6); ctx.stroke();
+    if (!busy) { ctx.fillStyle = COL.cuff; circ(ctx, h[0], h[1], 3.9); ctx.fillStyle = COL.skin; circ(ctx, h[0] + 1.2, h[1], 3.4); }
+  }
+  ctx.drawImage(standSpr, STAND.x0, STAND.y0, STAND.w, STAND.h);
+  ctx.strokeStyle = COL.scarf; ctx.lineWidth = 4; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(-4, 7); ctx.quadraticCurveTo(-12, 10, -18, 8 + st * 2); ctx.stroke();
+  ctx.strokeStyle = COL.scarfS; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(-14.5, 7.5 + st); ctx.lineTo(-14, 11 + st); ctx.stroke();
+  ctx.strokeStyle = COL.scarfD; ctx.lineWidth = .9; ctx.beginPath(); for (const o of [6, 8, 10]) { ctx.moveTo(-18, o + st * 2); ctx.lineTo(-21, o + st * 2.4); } ctx.stroke();
+  if (p.carry && p.carry !== 'chick') { drawCarry(p.carry); drawHandsLocal(); }
 }
-function drawHands(p) {
-  localT(p.x, p.y, p.a);
-  ctx.fillStyle = COL.skin; circ(ctx, 17, -7.8, 3.8); circ(ctx, 17, 7.8, 3.8);
+function drawHandsLocal() {
+  for (const y of [-7.8, 7.8]) { ctx.fillStyle = COL.cuff; circ(ctx, 15.5, y, 3.9); ctx.fillStyle = COL.skin; circ(ctx, 17, y, 3.6); }
 }
+function drawHands(p) { localT(p.x, p.y, p.a); drawHandsLocal(); }
 function drawPlayerLying(p, stretch) {
   localT(p.x, p.y, p.la); ctx.scale(stretch, 1);
-  ctx.fillStyle = 'rgba(50,28,8,.25)'; rr(ctx, -95, -21, 172, 46, 22); ctx.fill();
-  ctx.fillStyle = COL.jean; rr(ctx, -82, -16, 76, 14.5, 6); ctx.fill(); rr(ctx, -82, 1.5, 76, 14.5, 6); ctx.fill();
-  ctx.fillStyle = 'rgba(255,255,255,.08)'; ell(ctx, -46, -9, 7, 4); ell(ctx, -46, 8.5, 7, 4);
-  ctx.strokeStyle = COL.jeanD; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(-80, -2.5); ctx.lineTo(-8, -2.5); ctx.moveTo(-80, 2); ctx.lineTo(-8, 2); ctx.stroke();
-  ctx.fillStyle = COL.boot; rr(ctx, -97, -17.5, 19, 16, 6); ctx.fill(); rr(ctx, -97, 1.5, 19, 16, 6); ctx.fill();
-  ctx.fillStyle = 'rgba(255,230,200,.12)'; ell(ctx, -92, -9.5, 3, 5); ell(ctx, -92, 9.5, 3, 5);
-  const gr = ctx.createLinearGradient(-14, 0, 42, 0); gr.addColorStop(0, COL.sw); gr.addColorStop(1, COL.swL);
-  ctx.fillStyle = gr; rr(ctx, -14, -20, 56, 40, 13); ctx.fill();
-  ctx.fillStyle = COL.swD; rr(ctx, -14, -20, 6, 40, 4); ctx.fill();
-  ctx.strokeStyle = 'rgba(30,45,35,.16)'; ctx.lineWidth = .8; ctx.beginPath();
-  for (let y = -15; y <= 15; y += 3.4) for (let x = -4; x < 36; x += 5) { ctx.moveTo(x, y); ctx.quadraticCurveTo(x + 1.5, y + 1.2, x + 3, y); }
-  ctx.stroke();
-  const breath = Math.sin(time * 1.4) * .8;
-  ctx.strokeStyle = COL.swD; ctx.lineWidth = 8.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-  ctx.beginPath(); ctx.moveTo(34, -17); ctx.lineTo(16, -28 - breath * .3); ctx.lineTo(-2, -27); ctx.moveTo(34, 17); ctx.lineTo(16, 28 + breath * .3); ctx.lineTo(-2, 27); ctx.stroke();
-  ctx.fillStyle = COL.skin; circ(ctx, -5, -27, 4.2); circ(ctx, -5, 27, 4.2);
-  ctx.fillStyle = COL.scarf; rr(ctx, 37, -13, 9, 26, 3); ctx.fill();
-  ctx.strokeStyle = COL.scarf; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(40, -6); ctx.quadraticCurveTo(30, -13, 19, -9); ctx.stroke();
-  ctx.strokeStyle = COL.scarfD; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(19, -11); ctx.lineTo(16, -12); ctx.moveTo(19, -7); ctx.lineTo(16, -7); ctx.stroke();
-  ctx.fillStyle = COL.skin; circ(ctx, 54, 0, 11.5);
-  ctx.strokeStyle = COL.hair; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(54, 0, 11.2, -1.9, -1.2); ctx.moveTo(54 + Math.cos(1.2) * 11.2, Math.sin(1.2) * 11.2); ctx.arc(54, 0, 11.2, 1.2, 1.9); ctx.stroke();
-  ctx.save(); ctx.beginPath(); ctx.arc(54, 0, 12.2, 0, TAU); ctx.clip();
-  ctx.fillStyle = COL.bean; ctx.fillRect(55, -14, 16, 28);
-  ctx.fillStyle = COL.beanD; ctx.fillRect(54.5, -14, 4.5, 28);
-  ctx.restore();
-  ctx.fillStyle = COL.pom; circ(ctx, 68, 0, 5);
-  ctx.strokeStyle = 'rgba(60,35,20,.8)'; ctx.lineWidth = 1.1; ctx.beginPath();
-  ctx.arc(50.5, -4.3, 1.9, Math.PI / 2, Math.PI * 1.5); ctx.moveTo(50.5, 6.2); ctx.arc(50.5, 4.3, 1.9, Math.PI / 2, Math.PI * 1.5);
-  ctx.moveTo(46, 2.4); ctx.arc(46, 0, 2.4, Math.PI / 2, Math.PI * 1.5); ctx.stroke();
-  ctx.fillStyle = 'rgba(232,120,105,.45)'; circ(ctx, 47.5, -7.2, 1.9); circ(ctx, 47.5, 7.2, 1.9);
+  ctx.drawImage(lieLow, LIE.x0, LIE.y0, LIE.w, LIE.h);
+  const br = 1 + Math.sin(time * 1.3) * .014;
+  ctx.translate(10, 0); ctx.scale(1, br); ctx.translate(-10, 0);
+  ctx.drawImage(lieUp, LIE.x0, LIE.y0, LIE.w, LIE.h);
 }
 function drawLamp(l) {
-  const x = l.x, y = l.y - 62;
+  const x = l.x, y = l.y - LAMP_DROP[l.h - 1];
   ctx.strokeStyle = 'rgba(28,20,14,.85)'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.moveTo(x, y - 24); ctx.lineTo(x, y - 600); ctx.stroke();
-  ctx.save(); ctx.globalCompositeOperation = 'screen';
-  const hg = ctx.createRadialGradient(x, y + 2, 0, x, y + 2, 46); hg.addColorStop(0, 'rgba(255,130,60,.55)'); hg.addColorStop(1, 'rgba(255,90,30,0)');
-  ctx.fillStyle = hg; ctx.fillRect(x - 46, y - 44, 92, 92); ctx.restore();
+  ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = .45;
+  ctx.drawImage(glowSpr, x - 46, y - 44, 92, 92);
+  ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
   const mg = ctx.createLinearGradient(x - 21, 0, x + 21, 0); mg.addColorStop(0, '#5f5b57'); mg.addColorStop(.45, '#cfcac1'); mg.addColorStop(1, '#55514d');
   ctx.fillStyle = mg; ctx.beginPath(); ctx.moveTo(x - 21, y); ctx.lineTo(x - 8, y - 18); ctx.lineTo(x + 8, y - 18); ctx.lineTo(x + 21, y); ctx.closePath(); ctx.fill();
   ctx.fillStyle = '#2e2b28'; ctx.fillRect(x - 5, y - 25, 10, 8);
@@ -1649,7 +2785,7 @@ function drawMotes(dt) {
   const a = L.day * (1 - L.gold * .3); if (a < .05) return;
   ctx.fillStyle = 'rgb(255,246,214)';
   for (const m of motes) {
-    if (!reduceMotion) { m.u += dt * .012 * m.s; m.v += Math.sin(time * .7 + m.ph) * dt * .01; if (m.u > 1) { m.u = 0; m.v = rand(); } }
+    if (!reduceMotion) { const breeze = barn.windows[m.win] ? 3 : 1; m.u += dt * .012 * m.s * breeze; m.v += Math.sin(time * .7 + m.ph) * dt * .01 * breeze; if (m.u > 1) { m.u = 0; m.v = rand(); } }
     const wx = windowsX[m.win], sp = sunPatch(wx), vv = clamp(m.v, 0, 1);
     const tx = wx - 50 + vv * 100, ty = 120, bx = sp.x - 54 + sp.sh * 30 + vv * 108, by = sp.y + 30;
     const x = lerp(tx, bx, m.u), y = lerp(ty, by, m.u);
@@ -1665,44 +2801,46 @@ function drawHeart(x, y, s) {
 }
 function drawOverlay() {
   const n = 1 - L.day;
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
   if (n > .01) {
+    // low-res darkness layer: fill, punch soft holes for the lamps and windows, then scale up once
+    const q = 1 / LQ, Zq = Z * q;
     lctx.setTransform(1, 0, 0, 1, 0, 0); lctx.globalCompositeOperation = 'source-over';
     lctx.clearRect(0, 0, lc.width, lc.height);
     lctx.fillStyle = `rgba(14,12,32,${.74 * n})`; lctx.fillRect(0, 0, lc.width, lc.height);
     lctx.globalCompositeOperation = 'destination-out';
-    for (const l of lamps) {
-      for (const [ly, R0, al] of [[l.y, 175, .92], [l.y - 62, 40, .9]]) {
-        const [sx, sy] = toScreen(l.x, ly), R = R0 * Z * DPR;
-        const g = lctx.createRadialGradient(sx, sy, 0, sx, sy, R);
-        g.addColorStop(0, `rgba(0,0,0,${al})`); g.addColorStop(.45, `rgba(0,0,0,${al * .6})`); g.addColorStop(1, 'rgba(0,0,0,0)');
-        lctx.fillStyle = g; lctx.fillRect(sx - R, sy - R, R * 2, R * 2);
-      }
-    }
-    for (const wx of windowsX) {
-      const [sx, sy] = toScreen(wx, 82), R = 64 * Z * DPR;
-      const g = lctx.createRadialGradient(sx, sy, 0, sx, sy, R); g.addColorStop(0, 'rgba(0,0,0,.35)'); g.addColorStop(1, 'rgba(0,0,0,0)');
-      lctx.fillStyle = g; lctx.fillRect(sx - R, sy - R, R * 2, R * 2);
-    }
-    ctx.drawImage(lc, 0, 0);
-    ctx.globalCompositeOperation = 'screen';
-    for (const l of lamps) {
-      const [sx, sy] = toScreen(l.x, l.y), R = 200 * Z * DPR;
-      const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, R); g.addColorStop(0, `rgba(255,90,30,${.22 * n})`); g.addColorStop(1, 'rgba(255,90,30,0)');
-      ctx.fillStyle = g; ctx.fillRect(sx - R, sy - R, R * 2, R * 2);
-    }
-    ctx.globalCompositeOperation = 'source-over';
+    const hole = (x, y, R, al) => {
+      const sx = ((x - camX) * Z + W / 2) * q, sy = ((y - camY) * Z + H / 2) * q, r = R * Zq;
+      if (sx + r < 0 || sy + r < 0 || sx - r > lc.width || sy - r > lc.height) return;
+      const g = lctx.createRadialGradient(sx, sy, 0, sx, sy, r);
+      g.addColorStop(0, `rgba(0,0,0,${al})`); g.addColorStop(.45, `rgba(0,0,0,${al * .6})`); g.addColorStop(1, 'rgba(0,0,0,0)');
+      lctx.fillStyle = g; lctx.fillRect(sx - r, sy - r, r * 2, r * 2);
+    };
+    for (const l of lamps) { hole(l.x, l.y, 145 + l.h * 22, .96 - l.h * .06); hole(l.x, l.y - LAMP_DROP[l.h - 1], 40, .9); }
+    for (const wx of windowsX) hole(wx, 82, 64, .35);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.imageSmoothingEnabled = true;
+    ctx.drawImage(lc, 0, 0, lc.width, lc.height, 0, 0, cvs.width, cvs.height);
+    worldT(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = .16 * n;
+    for (const l of lamps) ctx.drawImage(glowSpr, l.x - 200, l.y - 200, 400, 400);
+    ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
   }
   if (L.gold > .01) {
-    ctx.globalCompositeOperation = 'soft-light'; ctx.fillStyle = `rgba(255,140,60,${.35 * L.gold})`;
-    ctx.fillRect(0, 0, cvs.width, cvs.height); ctx.globalCompositeOperation = 'source-over';
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.fillStyle = `rgba(255,140,60,${.08 * L.gold})`; ctx.fillRect(0, 0, cvs.width, cvs.height);
   }
-  const cw = cvs.width, ch = cvs.height;
-  const vg = ctx.createRadialGradient(cw / 2, ch / 2, Math.min(cw, ch) * .35, cw / 2, ch / 2, Math.max(cw, ch) * .75);
-  vg.addColorStop(0, 'rgba(20,10,4,0)'); vg.addColorStop(1, 'rgba(20,10,4,.45)');
-  ctx.fillStyle = vg; ctx.fillRect(0, 0, cw, ch);
+}
+function pill(sx, sy, key, text) {
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.font = '800 13px Nunito, system-ui, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+  const kw = key ? ctx.measureText(key).width + 10 : 0, tw = ctx.measureText(text).width;
+  const w = tw + kw + (key ? 24 : 18), h = 26, x = Math.round(sx - w / 2), y = Math.round(sy - h);
+  ctx.fillStyle = 'rgba(23,17,12,.82)'; rr(ctx, x, y, w, h, 13); ctx.fill();
+  if (key) { ctx.fillStyle = 'rgba(246,232,204,.18)'; rr(ctx, x + 6, y + 5, kw, 16, 4); ctx.fill(); ctx.fillStyle = '#f6e8cc'; ctx.fillText(key, x + 11, y + 13.5); }
+  ctx.fillStyle = '#f6e8cc'; ctx.fillText(text, x + (key ? kw + 14 : 9), y + 13.5);
+  ctx.textBaseline = 'alphabetic';
 }
 const groundVis = [], bodyVis = [];
+const hoverTouch = matchMedia('(hover: none)').matches;
 function render(dt) {
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   ctx.fillStyle = '#17110c'; ctx.fillRect(0, 0, W, H);
@@ -1710,8 +2848,13 @@ function render(dt) {
   const vw = W / Z, vh = H / Z;
   const x0 = Math.max(0, camX - vw / 2 - 2), y0 = Math.max(0, camY - vh / 2 - 2), x1 = Math.min(WW, camX + vw / 2 + 2), y1 = Math.min(WH, camY + vh / 2 + 2);
   if (x1 > x0 && y1 > y0) ctx.drawImage(floorC, x0 * FS, y0 * FS, (x1 - x0) * FS, (y1 - y0) * FS, x0, y0, x1 - x0, y1 - y0);
-  drawWindows(); drawDoorLight(); drawSun(); worldT(); drawLampGlow(); drawSeeds();
-  drawCat();
+  if (y0 < WALL) { drawWindows(); drawChalkboard(); drawDoorLight(); }
+  drawSun(); worldT(); drawFresh(); drawLampGlow();
+  drawCrate();
+  feeders.forEach((f, i) => drawFeeder(f, barn.feed[i]));
+  waterers.forEach((w, i) => drawWaterer(w, barn.water[i], barn.dirt[i]));
+  drawDroppings(x0 - 4, y0 - 4, x1 + 4, y1 + 4); drawSeeds();
+  if (y0 < 260 && x0 < 160) drawCat();
   const m = 30;
   groundVis.length = 0; bodyVis.length = 0;
   for (const c of chicks) {
@@ -1722,6 +2865,7 @@ function render(dt) {
   groundVis.sort((a, b) => a.y - b.y); bodyVis.sort((a, b) => a.y - b.y);
   worldT(); drawShadows(groundVis);
   for (const c of groundVis) drawChick(c);
+  drawBird();
   const p = player;
   if (p.lieT < .5) drawPlayerStanding(p, p.lieT * 2);
   else drawPlayerLying(p, lerp(.6, 1, (p.lieT - .5) * 2));
@@ -1735,6 +2879,11 @@ function render(dt) {
     const x = lerp(f.x0, f.x1, f.t), y = lerp(f.y0, f.y1, f.t) - Math.sin(Math.PI * f.t) * 24;
     ctx.fillStyle = '#8a5a2a'; circ(ctx, x, y, 1.3);
   }
+  for (const d of drops) {
+    if (d.t < 0) continue;
+    const x = lerp(d.x0, d.x1, d.t), y = lerp(d.y0, d.y1, d.t) - Math.sin(Math.PI * d.t) * 10;
+    ctx.fillStyle = d.col; circ(ctx, x, y, 1.2);
+  }
   for (const q of puffs) {
     ctx.globalAlpha = clamp(q.life, 0, 1); ctx.strokeStyle = q.col; ctx.lineWidth = 1.2;
     ctx.beginPath(); ctx.moveTo(q.x - Math.cos(q.rot) * 4, q.y - q.z - Math.sin(q.rot) * 4); ctx.lineTo(q.x + Math.cos(q.rot) * 4, q.y - q.z + Math.sin(q.rot) * 4); ctx.stroke();
@@ -1744,33 +2893,75 @@ function render(dt) {
   ctx.globalAlpha = 1;
   ctx.font = '800 7px Grandstander, "Trebuchet MS", sans-serif'; ctx.textAlign = 'center';
   for (const z of zzz) { ctx.fillStyle = `rgba(255,248,230,${clamp(z.life, 0, 1) * .8})`; ctx.fillText('z', z.x, z.y); }
-  for (const l of lamps) drawLamp(l);
+  for (const l of lamps) if (l.x > x0 - 60 && l.x < x1 + 60 && l.y - 60 > y0 - 60 && l.y - 60 < y1 + 60) drawLamp(l);
   drawMotes(dt);
   drawOverlay();
+  // labels sit above the lighting so they stay readable at night
+  for (const c of chicks) {
+    const sick = c.pasty && c.s !== 'dead';
+    if (!c.name && !sick) continue;
+    if (Math.hypot(c.x - p.x, c.y - p.y) > 90 && c.hl <= 0) continue;
+    const sx = (c.x - camX) * Z + W / 2, sy = (c.y - c.z * .55 - camY) * Z + H / 2 - c.r * Z - 4;
+    if (sx < -40 || sx > W + 40 || sy < -20 || sy > H + 20) continue;
+    pill(sx, sy, '', sick ? (c.name ? c.name + ' · unwell' : 'Unwell') : c.name);
+  }
+  if (useCtx && started && !p.lying) {
+    const sx = (p.x - camX) * Z + W / 2, sy = (p.y - camY) * Z + H / 2 - 30 * Z;
+    pill(sx, sy, hoverTouch ? '' : 'E', useCtx.label + (useCtx.alt && !hoverTouch ? '  ·  Q Lower' : ''));
+  }
+}
+function drawSeeds() {
+  if (!seeds.length) return;
+  ctx.fillStyle = '#8a5a2a'; ctx.beginPath();
+  for (const s of seeds) { ctx.moveTo(s.x + 1.3, s.y); ctx.ellipse(s.x, s.y, 1.3, .85, s.rot, 0, TAU); }
+  ctx.fill();
+  ctx.fillStyle = '#d8b47a'; ctx.beginPath();
+  for (const s of seeds) { const x = s.x + Math.cos(s.rot) * 1.6, y = s.y + Math.sin(s.rot) * 1.6; ctx.moveTo(x + .8, y); ctx.arc(x, y, .8, 0, TAU); }
+  ctx.fill();
 }
 
 /* ---------- boot ---------- */
-let last = performance.now();
+let last = performance.now(), hiddenAt = 0;
 function frame(now) {
-  const dt = Math.min(.05, (now - last) / 1000 || .016); last = now;
+  const dt = clamp((now - last) / 1000, .001, .05); last = now;
   update(dt); render(dt);
   requestAnimationFrame(frame);
 }
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { hiddenAt = Date.now(); saveState(); return; }
+  const away = clamp((Date.now() - lastWall) / 1000, 0, 12 * 3600);
+  if (away > 20 * 60 && started) {
+    const before = { feed: N.feed, water: N.water, bed: N.bed, lost: barn.lost, causes: { ...barn.causes } };
+    lastWall = Date.now(); catchUp(away); evalNeeds();
+    showAway(away, before);
+  }
+});
+addEventListener('pagehide', saveState);
 function start(data) {
   data = data || {};
   if (typeof data.px === 'number') { player.x = data.px; player.y = data.py; }
   if (typeof data.dayP === 'number') dayP = data.dayP;
+  if (settings.time === 'real') dayP = clockP();
   camX = player.x; camY = player.y;
-  buildSprites(); buildSoft(); floorC = buildFloor(); initMotes();
-  spawnFlock(settings.count);
-  updateLight(); syncSeg(); updateButtons();
+  buildSprites(); buildFx(); buildPeople(); floorC = buildFloor(); initMotes();
+  updateLight(); evalNeeds();
+  spawnFlock(settings.count, barn.flock);
+  const before = { feed: N.feed, water: N.water, bed: N.bed, lost: barn.lost, causes: { ...barn.causes } };
+  const awaySec = hadSave ? clamp((Date.now() - barn.savedAt) / 1000, 0, 12 * 3600) : 0;
+  if (awaySec > 1) catchUp(awaySec);
+  evalNeeds(); lastWall = Date.now(); lastGrowth = -1;
+  if (settings.mode) setMode(settings.mode);
+  else document.body.classList.add('cozy');
+  syncSeg(); updateButtons(); updateHud();
   $('bSound').setAttribute('aria-pressed', settings.sound ? 'true' : 'false');
-  if (data.started) startGame();
+  if (data.started) { started = true; $('intro').hidden = true; }
+  else if (hadSave && settings.mode) showAway(awaySec, before);
+  booted = true;
   last = performance.now();
   requestAnimationFrame(frame);
 }
 if (window.claude && window.claude.hot && window.claude.hot.snapshot) {
-  window.claude.hot.snapshot(() => ({ px: player.x, py: player.y, dayP, started }));
+  window.claude.hot.snapshot(() => { saveState(); return { px: player.x, py: player.y, dayP, started }; });
 }
 const fontsReady = document.fonts && document.fonts.load
   ? Promise.race([Promise.all([document.fonts.load('600 15px Caveat'), document.fonts.load('800 8px Nunito'), document.fonts.load('800 8px Grandstander')]), new Promise(r => setTimeout(r, 1500))])

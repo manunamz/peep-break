@@ -1,6 +1,6 @@
-# Brooder Barn
+# Peep Break
 
-A cosy, goal-free toy: a barn full of chicks under heat lamps. Walk around, pet them, scatter feed, pick one up, or lie down in the straw and let the flock pile on.
+A barn full of chicks under heat lamps. Cozy mode is just for visiting. In Care mode you run the brooder and try to raise as many chicks as you can to week six (six real days). Includes a brooding guide for real chicks.
 
 ## Files
 
@@ -17,6 +17,8 @@ A cosy, goal-free toy: a barn full of chicks under heat lamps. Walk around, pet 
 | Pet | Click a chick (or the cat) |
 | Lie down / get up | Space |
 | Scatter feed | F |
-| Pick up / put down | E |
+| Use / pick up / put down | E |
+| Lower a lamp | Q |
+| Name a held chick | N |
 | Sound | M |
 | Zoom | Scroll or pinch |
