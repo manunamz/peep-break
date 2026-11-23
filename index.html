@@ -215,7 +215,38 @@ body.cozy .care-only { display: none; }
 .guide th { font-size: 11px; letter-spacing: .07em; text-transform: uppercase; opacity: .7; }
 .guide .note { font-size: 12.5px; opacity: .75; margin-top: 12px; }
 
-@media (hover: none) { .act kbd { display: none; } .act { padding: 0 18px; } .hint { display: none; } }
+button { touch-action: manipulation; -webkit-touch-callout: none; }
+.stick, .touch-only, body.touch .key-only { display: none; }
+body.touch .touch-only { display: revert; }
+body.touch .act kbd, body.touch .hint { display: none; }
+body.touch .stick {
+  position: fixed; display: block; width: var(--stick); height: var(--stick); border-radius: 50%; touch-action: none;
+  left: calc(16px + env(safe-area-inset-left, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  background: rgba(23,17,12,.45); box-shadow: inset 0 0 0 2px rgba(246,232,204,.35);
+  -webkit-touch-callout: none;
+}
+.stick i {
+  position: absolute; left: 50%; top: 50%; width: 46px; height: 46px; margin: -23px 0 0 -23px; border-radius: 50%;
+  background: var(--kraft); box-shadow: 0 3px 0 var(--kraft-deep), 0 8px 16px rgba(0,0,0,.35); pointer-events: none;
+}
+body.touch { --stick: 112px; }
+body.touch .actions {
+  left: auto; width: min(320px, calc(100% - var(--stick) - 44px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)));
+  right: calc(16px + env(safe-area-inset-right, 0px)); padding: 0;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 9px 8px;
+}
+body.touch .act { display: block; min-width: 0; min-height: 50px; padding: 2px 6px; font-size: 13px; line-height: 1.15; text-align: center; }
+body.touch .act:hover:not([data-on="true"]) { background: var(--barn); }
+body.touch #bUse span { min-width: 0; text-align: center; }
+body.touch #bAlt, body.touch #bName { order: -1; grid-column: 1 / -1; }
+body.touch .toast { bottom: calc(200px + env(safe-area-inset-bottom, 0px)); }
+/* up top, clear of the on-screen keyboard */
+body.touch .namer { bottom: auto; top: calc(16px + env(safe-area-inset-top, 0px)); }
+body.touch .namer input, body.touch .namer button { min-height: 44px; }
+/* keep the start buttons in view when the card has to scroll */
+body.touch #intro .modes { position: sticky; bottom: -22px; margin: 0 -24px; padding: 8px 24px 22px; background: #d2ad75; }
+body.touch #intro .card { padding-bottom: 22px; }
+@supports (height: 100dvh) { .panel { max-height: calc(100dvh - 120px); } }
 @media (max-width: 420px) { .modes { grid-template-columns: 1fr; } }
 @media (max-width: 720px) {
   .hint, .clip dl, .clip .foot { display: none; }
@@ -228,6 +259,17 @@ body.cozy .care-only { display: none; }
   .act kbd { display: none; }
   #bUse span { min-width: 0; }
 }
+@media (max-height: 480px) {
+  .clip dl, .clip .foot { display: none; }
+  body.touch { --stick: 96px; }
+  body.touch .clip { transform: rotate(-1.4deg) scale(.82); }
+  body.touch #intro .card { max-width: 640px; padding-top: 14px; }
+  body.touch #intro .card h2 { font-size: 24px; margin-bottom: 6px; }
+  body.touch #intro .card p { display: none; }
+  body.touch #intro .mode-btn { padding: 8px 12px; font-size: 12px; line-height: 1.25; }
+}
+@media (max-width: 350px) { .clip { width: 126px; } .round { width: 44px; height: 44px; } }
+@media (max-width: 420px) { body.touch #intro .modes { gap: 8px; grid-template-columns: 1fr 1fr; } body.touch #intro .mode-btn { padding: 10px; font-size: 12px; line-height: 1.3; } }
 </style>
 </head>
 <body>
@@ -300,8 +342,10 @@ body.cozy .care-only { display: none; }
   </div>
 </div>
 
+<div class="stick" id="stick" aria-label="Walking thumbstick"><i></i></div>
 <div class="actions">
   <button class="act" id="bLie"><kbd>Space</kbd><span>Lie down</span></button>
+  <button class="act touch-only" id="bTip" aria-pressed="false"><span>Tiptoe</span></button>
   <button class="act" id="bFeed"><kbd>F</kbd><span>Scatter feed</span></button>
   <button class="act" id="bUse" disabled><kbd>E</kbd><span>Use</span></button>
   <button class="act" id="bAlt" hidden><kbd>Q</kbd><span>Lower lamp</span></button>
@@ -322,17 +366,22 @@ body.cozy .care-only { display: none; }
     <h2>Peep Break</h2>
     <p><span id="introCount">Three hundred</span> day-old chicks, a barn full of pine shavings, and heat lamps humming overhead. Leave it open in a tab and drop in on your breaks. One day here is a week of brooding, and in six days they're feathered out.</p>
     <dl>
-      <dt>Walk</dt><dd>WASD or arrows, or click / tap the floor</dd>
-      <dt>Use</dt><dd>E near feed sacks, the pump, the shavings, lamps, feeders, waterers, windows or a chick</dd>
-      <dt>Pet</dt><dd>Click or tap a chick nearby</dd>
-      <dt>Lie down</dt><dd>Space, then wait for the pile-on</dd>
-      <dt>Name</dt><dd>N while you're holding a chick</dd>
+      <dt>Walk</dt><dd><span class="key-only">WASD or arrows, or click the floor</span><span class="touch-only">Thumbstick, or tap the floor</span></dd>
+      <dt>Tiptoe</dt><dd><span class="key-only">Hold Shift</span><span class="touch-only">Tiptoe button turns it on and off</span></dd>
+      <dt>Use</dt><dd><span class="key-only">E</span><span class="touch-only">Bottom-right button</span> near feed sacks, the pump, the shavings, lamps, feeders, waterers, windows or a chick</dd>
+      <dt>Lower lamp</dt><dd><span class="key-only">Q</span><span class="touch-only">Lower lamp button</span> under a raised lamp</dd>
+      <dt>Feed</dt><dd><span class="key-only">F</span><span class="touch-only">Scatter feed button</span></dd>
+      <dt>Pet</dt><dd><span class="key-only">Click</span><span class="touch-only">Tap</span> a chick or the cat</dd>
+      <dt>Lie down</dt><dd><span class="key-only">Space</span><span class="touch-only">Lie down button</span>, then wait for the pile-on</dd>
+      <dt>Name</dt><dd><span class="key-only">N</span><span class="touch-only">Name button</span> while you're holding a chick</dd>
+      <dt>Zoom</dt><dd><span class="key-only">Scroll</span><span class="touch-only">Pinch with two fingers</span></dd>
+      <dt>Sound</dt><dd><span class="key-only">M or the speaker icon</span><span class="touch-only">Speaker icon</span></dd>
     </dl>
     <div class="modes">
       <button class="mode-btn cozy" id="bCozy"><b>Cozy visit</b>A farmhand does the chores. Just hang out with the chicks.</button>
       <button class="mode-btn care" id="bCare"><b>Care for them</b>You keep them warm, fed and watered. Real brooding, real stakes.</button>
     </div>
-    <small>The book icon opens a brooding guide for real chicks. M toggles sound.</small>
+    <small>The book icon opens a brooding guide for real chicks.</small>
   </div>
 </div>
 
@@ -424,10 +473,13 @@ body.cozy .care-only { display: none; }
       <p><b>Space:</b> plan on about 0.05 m² (half a square foot) per chick at first and around 0.2 m² (2 square feet) by six weeks. Round off brooder corners with cardboard so frightened or cold chicks can't pile into them.</p>
     </section>
     <section data-tab="game" hidden>
+      <h3>Controls</h3>
+      <p class="key-only">WASD or arrows walk, Shift tiptoes, E uses whatever is nearby, Q lowers a lamp, F scatters feed, Space lies down or gets up, N names a held chick and M toggles sound. Click to pet, scroll to zoom.</p>
+      <p class="touch-only">Walk with the thumbstick or tap the floor. The Tiptoe button turns quiet steps on and off. The bottom-right button uses whatever is nearby, and extra buttons appear to lower a lamp or name a held chick. Lie down becomes Get up while you're resting. Tap a chick to pet it, pinch to zoom, and tap the speaker for sound.</p>
       <h3>How this barn works</h3>
       <p>Time runs seven times faster here: one real day is one week of brooding. Feed and water are the exception: like a real brooder, they need checking about twice a day in Care mode.</p>
       <ul>
-        <li><b>Heat:</b> each lamp warms about 50 chicks. Stand under a lamp and press E to raise it or Q to lower it. Grab a spare from the lamp crate to hang more.</li>
+        <li><b>Heat:</b> each lamp warms about 50 chicks. Stand under a lamp and <span class="key-only">press E to raise it or Q to lower it.</span><span class="touch-only">use the Raise lamp and Lower lamp buttons.</span> Grab a spare from the lamp crate to hang more.</li>
         <li><b>Feed and water:</b> scoop starter from the sacks by the door and fill a pail at the pump on the right-hand wall.</li>
         <li><b>Bedding:</b> grab pine shavings from the wrapped bale on the left wall and spread them over droppings.</li>
         <li><b>Health:</b> look for a hunched chick standing alone, pick it up, and clean its vent.</li>
@@ -1854,7 +1906,7 @@ function doUse() {
     case 'pick': {
       const c = u.c; p.held = c; p.carry = 'chick';
       enter(c, 'held', 4); c.sl = false; c.happy = .6; peepAt(c);
-      if (!c.name) toast('Press N to give this one a name.');
+      if (!c.name) toast(touchUI ? 'Tap Name to give this one a name.' : 'Press N to give this one a name.');
       else toast(`Hello, ${c.name}.`);
       break;
     }
@@ -1922,7 +1974,7 @@ const namer = document.getElementById('namer'), nameIn = document.getElementById
 function openNamer() {
   const c = player.held; if (!c) { toast('Pick up a chick first, then name it.'); return; }
   nameIn.value = c.name || ''; namer.hidden = false; keys.clear();
-  setTimeout(() => nameIn.focus(), 0);
+  nameIn.focus(); // synchronous, or iOS won't open its keyboard
 }
 function closeNamer() { namer.hidden = true; nameIn.blur(); }
 namer.addEventListener('submit', e => {
@@ -2077,7 +2129,37 @@ const keys = new Set();
 let started = false, walkHold = false;
 const pointers = new Map(); let pinch = null;
 let camX = player.x, camY = player.y, Z = 1.8, userZoom = 1, lieZoom = 1;
+const stick = { el: document.getElementById('stick'), id: null, x: 0, y: 0 };
+let touchUI = false, tipOn = false;
 const toWorld = (sx, sy) => ({ x: (sx - W / 2) / Z + camX, y: (sy - H / 2) / Z + camY });
+
+function setTip(on) { tipOn = on; document.getElementById('bTip').setAttribute('aria-pressed', String(on)); document.getElementById('bTip').dataset.on = String(on); }
+function moveStick(x, y) {
+  stick.x = x; stick.y = y;
+  const R = stick.el.clientWidth / 2 - 18;
+  stick.el.firstElementChild.style.transform = `translate(${x * R}px, ${y * R}px)`;
+}
+function releaseStick() { stick.id = null; moveStick(0, 0); }
+// follows whichever input was used last, so tablets with keyboards and touch laptops both work
+function setTouch(on) {
+  if (on === touchUI) return;
+  touchUI = on; document.body.classList.toggle('touch', on);
+  if (!on) { setTip(false); releaseStick(); }
+}
+setTouch(matchMedia('(hover: none), (pointer: coarse)').matches);
+addEventListener('pointerdown', e => { if (e.pointerType === 'touch') setTouch(true); }, true);
+function aimStick(e) {
+  const b = stick.el.getBoundingClientRect(), R = b.width / 2 - 18;
+  const x = (e.clientX - b.left - b.width / 2) / R, y = (e.clientY - b.top - b.height / 2) / R, d = Math.hypot(x, y);
+  if (d < .18) moveStick(0, 0); else moveStick(x / Math.max(1, d), y / Math.max(1, d));
+}
+stick.el.addEventListener('pointerdown', e => {
+  if (stick.id !== null) return;
+  stick.id = e.pointerId; try { stick.el.setPointerCapture(e.pointerId); } catch (_) {}
+  aimStick(e);
+});
+stick.el.addEventListener('pointermove', e => { if (e.pointerId === stick.id) aimStick(e); });
+for (const t of ['pointerup', 'pointercancel', 'lostpointercapture']) stick.el.addEventListener(t, e => { if (e.pointerId === stick.id) releaseStick(); });
 
 addEventListener('keydown', e => {
   if (e.target.tagName === 'INPUT') { if (e.key === 'Escape') closeNamer(); return; }
@@ -2087,6 +2169,7 @@ addEventListener('keydown', e => {
   if (!$('done').hidden) return;
   if (!document.getElementById('away').hidden) { if (k === 'enter' || k === ' ') { e.preventDefault(); closeAway(); } return; }
   if (!started) return;
+  if ([' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'w', 'a', 's', 'd', 'f', 'e', 'q', 'n', 'm', 'shift'].includes(k)) setTouch(false);
   if ([' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(k)) e.preventDefault();
   if (e.repeat && [' ', 'f', 'e', 'q', 'm', 'n'].includes(k)) return;
   if (k === ' ') toggleLie();
@@ -2098,7 +2181,7 @@ addEventListener('keydown', e => {
   else keys.add(k);
 });
 addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
-addEventListener('blur', () => keys.clear());
+addEventListener('blur', () => { keys.clear(); releaseStick(); });
 
 function findChickAt(x, y, tol) {
   let best = null, bd = Infinity;
@@ -2137,7 +2220,7 @@ cvs.addEventListener('pointerdown', e => {
   if (pointers.size === 2) {
     const [a, b] = [...pointers.values()];
     pinch = { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, z: userZoom };
-    player.walkTo = null; walkHold = false; return;
+    player.walkTo = null; player.petTarget = null; walkHold = false; return;
   }
   if (pointers.size > 1) return;
   tap(e.clientX, e.clientY, e.pointerType);
@@ -2186,7 +2269,7 @@ function syncUse() {
 function bindAct(id, fn) {
   $(id).addEventListener('click', e => { if (!started) return; fn(); if (e.detail > 0) e.currentTarget.blur(); });
 }
-bindAct('bLie', toggleLie); bindAct('bFeed', scatter); bindAct('bUse', doUse); bindAct('bName', openNamer); bindAct('bAlt', doAlt);
+bindAct('bLie', toggleLie); bindAct('bFeed', scatter); bindAct('bUse', doUse); bindAct('bName', openNamer); bindAct('bAlt', doAlt); bindAct('bTip', () => setTip(!tipOn));
 $('bSound').addEventListener('click', e => { setSound(!settings.sound); if (e.detail > 0) e.currentTarget.blur(); });
 $('bSettings').addEventListener('click', e => {
   const pnl = $('panel'); pnl.hidden = !pnl.hidden;
@@ -2216,7 +2299,7 @@ document.querySelectorAll('.seg').forEach(seg => seg.addEventListener('click', e
 function renderNames() {
   const box = $('nameList'); box.textContent = '';
   const named = chicks.filter(c => c.name);
-  if (!named.length) { const p = document.createElement('div'); p.className = 'none'; p.textContent = 'None named yet. Pick up a chick with E, then press N.'; box.appendChild(p); return; }
+  if (!named.length) { const p = document.createElement('div'); p.className = 'none'; p.textContent = touchUI ? 'None named yet. Pick up a chick, then tap Name.' : 'None named yet. Pick up a chick with E, then press N.'; box.appendChild(p); return; }
   for (const c of named) {
     const b = document.createElement('button'); b.type = 'button';
     const dot = document.createElement('i'); dot.style.background = BANDS[c.band];
@@ -2228,7 +2311,7 @@ function renderNames() {
 let broodArm = false;
 $('bNewBrood').addEventListener('click', e => {
   const b = e.currentTarget;
-  if (!broodArm) { broodArm = true; b.textContent = 'Click again to say goodbye'; b.classList.add('warn'); setTimeout(() => { broodArm = false; b.textContent = 'Start a new brood'; b.classList.remove('warn'); }, 4000); return; }
+  if (!broodArm) { broodArm = true; b.textContent = touchUI ? 'Tap again to say goodbye' : 'Click again to say goodbye'; b.classList.add('warn'); setTimeout(() => { broodArm = false; b.textContent = 'Start a new brood'; b.classList.remove('warn'); }, 4000); return; }
   broodArm = false; b.textContent = 'Start a new brood'; b.classList.remove('warn');
   newBrood();
 });
@@ -2322,9 +2405,10 @@ let lureClock = 0, zClock = 0, statClock = 0, cricketClock = 3, lastStep = 0, sa
 let lastWall = Date.now();
 function updatePlayer(dt) {
   const p = player;
-  p.tiptoe = keys.has('shift');
+  p.tiptoe = keys.has('shift') || tipOn;
   let ix = 0, iy = 0;
   if (started && namer.hidden) {
+    ix = stick.x; iy = stick.y;
     if (keys.has('a') || keys.has('arrowleft')) ix -= 1;
     if (keys.has('d') || keys.has('arrowright')) ix += 1;
     if (keys.has('w') || keys.has('arrowup')) iy -= 1;
@@ -2848,7 +2932,6 @@ function pill(sx, sy, key, text) {
   ctx.textBaseline = 'alphabetic';
 }
 const groundVis = [], bodyVis = [];
-const hoverTouch = matchMedia('(hover: none)').matches;
 function render(dt) {
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   ctx.fillStyle = '#17110c'; ctx.fillRect(0, 0, W, H);
@@ -2915,7 +2998,7 @@ function render(dt) {
   }
   if (useCtx && started && !p.lying) {
     const sx = (p.x - camX) * Z + W / 2, sy = (p.y - camY) * Z + H / 2 - 30 * Z;
-    pill(sx, sy, hoverTouch ? '' : 'E', useCtx.label + (useCtx.alt && !hoverTouch ? '  ·  Q Lower' : ''));
+    pill(sx, sy, touchUI ? '' : 'E', useCtx.label + (useCtx.alt && !touchUI ? '  ·  Q Lower' : ''));
   }
 }
 function drawSeeds() {

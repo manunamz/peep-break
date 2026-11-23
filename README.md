@@ -16,18 +16,20 @@ Open `index.html` in a browser to play locally.
 
 ## Controls
 
-| Action | Keys |
-| --- | --- |
-| Walk | WASD / arrows, or click/tap the floor |
-| Tiptoe | Hold Shift |
-| Pet | Click a chick (or the cat) |
-| Lie down / get up | Space |
-| Scatter feed | F |
-| Use / pick up / put down | E |
-| Lower a lamp | Q |
-| Name a held chick | N |
-| Sound | M |
-| Zoom | Scroll or pinch |
+| Action | Keyboard / mouse | Touch |
+| --- | --- | --- |
+| Walk | WASD / arrows, or click the floor | Thumbstick, or tap the floor |
+| Tiptoe | Hold Shift | Tiptoe button (on/off) |
+| Pet | Click a chick (or the cat) | Tap a chick (or the cat) |
+| Lie down / get up | Space | Lie down / Get up button |
+| Scatter feed | F | Scatter feed button |
+| Use / pick up / put down | E | Bottom-right button |
+| Lower a lamp | Q | Lower lamp button (under a raised lamp) |
+| Name a held chick | N | Name button (while holding one) |
+| Sound | M | Speaker icon |
+| Zoom | Scroll | Pinch |
+
+Touch controls appear on phones and tablets, and whenever you touch the screen.
 
 ## License
 
